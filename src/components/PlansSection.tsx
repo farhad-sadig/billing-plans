@@ -1,30 +1,39 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { BasicPlanIcon, ProfessionalPlanIcon, StarterPlanIcon } from "./Icons";
+import RadioButton from "./RadioButton";
 
-type PlanType = "starter" | "basic" | "professional";
+export type PlanType = "Starter" | "Basic" | "Professional";
 
 export default function PlansSection() {
-	const [selectedPlan, setSelectedPlan] = useState<PlanType>("starter");
+	const [currentPlan, setCurrentPlan] = useState<PlanType>("Starter");
+	const [previousPlan, setPreviousPlan] = useState<PlanType>("Starter");
+	const [isButtonEnabled, setIsButtonEnabled] = useState(false);
+
+	useEffect(() => {
+		setIsButtonEnabled(currentPlan !== previousPlan);
+	}, [currentPlan, previousPlan]);
 
 	const handlePlanChange = (plan: PlanType) => {
-		setSelectedPlan(plan);
+		setCurrentPlan(plan);
+	};
+	const handleSaveChanges = () => {
+		setPreviousPlan(currentPlan);
+		setIsButtonEnabled(false);
 	};
 
 	return (
 		<div className="flex flex-col gap-4 desktop:w-full">
 			<div
-				className={`flex items-start p-5 gap-5 rounded-lg border border-solid tablet:items-center  ${
-					selectedPlan === "starter"
-						? "border-indigo-600"
-						: "border-neutral-200"
+				className={`flex items-start p-5 gap-5 rounded-lg border border-solid hover:bg-neutral-50 tablet:items-center ${
+					currentPlan === "Starter" ? "border-indigo-600" : "border-neutral-200"
 				}`}
 			>
 				<div className="flex flex-col items-start tablet:flex-row gap-5 tablet:items-center">
 					<StarterPlanIcon />
 					<div className="flex flex-col gap-2">
 						<div className="font-semibold text-lg text-neutral-900">
-							Starter plan • $0/month
+							Starter • $0/month
 						</div>
 						<div className="font-normal text-sm text-neutral-600">
 							Includes up to 10 users, 20GB individual data and access to all
@@ -33,22 +42,16 @@ export default function PlansSection() {
 					</div>
 				</div>
 
-				<input
-					className="w-6 h-6 ml-auto flex-shrink-0 mt-2 tablet:mt-0"
-					name="plan"
-					type="radio"
-					value="starter"
-					checked={selectedPlan === "starter"}
-					onChange={() => handlePlanChange("starter")}
+				<RadioButton
+					value="Starter"
+					checked={currentPlan === "Starter"}
+					handlePlanChange={handlePlanChange}
 				/>
-				<label htmlFor="starter" className="sr-only">
-					Starter plan
-				</label>
 			</div>
 
 			<div
-				className={`flex items-start p-5 gap-5 rounded-lg border border-solid tablet:items-center  ${
-					selectedPlan === "basic" ? "border-indigo-600" : "border-neutral-200"
+				className={`flex items-start p-5 gap-5 rounded-lg border border-solid hover:bg-neutral-50 tablet:items-center ${
+					currentPlan === "Basic" ? "border-indigo-600" : "border-neutral-200"
 				}`}
 			>
 				<div className="flex flex-col items-start tablet:flex-row gap-5 tablet:items-center">
@@ -72,21 +75,15 @@ export default function PlansSection() {
 					</div>
 				</div>
 
-				<input
-					className="w-6 h-6 ml-auto flex-shrink-0 mt-2 tablet:mt-0"
-					name="plan"
-					type="radio"
-					value="basic"
-					checked={selectedPlan === "basic"}
-					onChange={() => handlePlanChange("basic")}
+				<RadioButton
+					value="Basic"
+					checked={currentPlan === "Basic"}
+					handlePlanChange={handlePlanChange}
 				/>
-				<label htmlFor="basic" className="sr-only">
-					Basic plan
-				</label>
 			</div>
 			<div
-				className={`flex items-start p-5 gap-5 rounded-lg border border-solid tablet:items-center  ${
-					selectedPlan === "professional"
+				className={`flex items-start p-5 gap-5 rounded-lg border border-solid hover:bg-neutral-50 tablet:items-center ${
+					currentPlan === "Professional"
 						? "border-indigo-600"
 						: "border-neutral-200"
 				}`}
@@ -103,21 +100,22 @@ export default function PlansSection() {
 						</div>
 					</div>
 				</div>
-
-				<input
-					className="w-6 h-6 ml-auto flex-shrink-0 mt-2 tablet:mt-0"
-					name="plan"
-					type="radio"
-					value="professional"
-					checked={selectedPlan === "professional"}
-					onChange={() => handlePlanChange("professional")}
+				<RadioButton
+					value="Professional"
+					checked={currentPlan === "Professional"}
+					handlePlanChange={handlePlanChange}
 				/>
-				<label htmlFor="professional" className="sr-only">
-					Professional plan
-				</label>
 			</div>
 			<div className="flex justify-end items-center gap-4 py-4">
-				<button className="w-44 flex justify-center bg-neutral-100 px-5 py-3 rounded font-medium text-base text-neutral-400">
+				<button
+					className={`w-44 flex justify-center px-5 py-3 rounded font-medium text-base focus:shadow-custom-blue ${
+						isButtonEnabled
+							? "bg-indigo-700 text-white hover:bg-indigo-800"
+							: "bg-neutral-100 text-neutral-400"
+					}`}
+					onClick={handleSaveChanges}
+					disabled={!isButtonEnabled}
+				>
 					Save Changes
 				</button>
 			</div>

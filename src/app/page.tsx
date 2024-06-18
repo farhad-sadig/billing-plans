@@ -1,6 +1,18 @@
+"use client";
 import PlansSection from "@/components/PlansSection";
+import Modal from "@/components/Modal";
+import { useState } from "react";
 
 export default function Home() {
+	const [showModal, setShowModal] = useState(true);
+
+	const handleSaveChanges = () => {
+		setShowModal(true);
+	};
+
+	const handleCloseModal = () => {
+		setShowModal(false);
+	};
 	return (
 		<div className="flex flex-col w-full gap-8 py-8 px-4 bg-white tablet:px-8 tablet:py-16 desktop:mx-auto desktop:max-w-7xl">
 			<div className="flex flex-col gap-2">
@@ -14,7 +26,7 @@ export default function Home() {
 			</div>
 			<div className="flex flex-col desktop:flex-row desktop:items-start desktop:gap-8">
 				<PlansSection />
-				<div className="flex flex-col gap-6 p-4 rounded-lg border border-solid border-neutral-200">
+				<div className="flex flex-col gap-6 p-4 my-8 rounded-lg border border-solid border-neutral-200 desktop:my-0">
 					<span className="font-semibold text-lg text-neutral-900 whitespace-nowrap">
 						Your current subscription
 					</span>
@@ -31,6 +43,7 @@ export default function Home() {
 					</div>
 				</div>
 			</div>
+			<Modal show={showModal} onClose={handleCloseModal} />
 		</div>
 	);
 }

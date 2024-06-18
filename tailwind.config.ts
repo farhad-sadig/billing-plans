@@ -11,6 +11,11 @@ const config: Config = {
 			desktop: "1280px",
 			tablet: "768px",
 			mobile: "375px"
+		},
+		extend: {
+			boxShadow: {
+				"custom-blue": "0px 0px 0px 4px rgba(68, 76, 231, 0.12)"
+			}
 		}
 	},
 	plugins: []
