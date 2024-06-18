@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { BasicPlanIcon, ProfessionalPlanIcon, StarterPlanIcon } from "./Icons";
 import RadioButton from "./RadioButton";
+import SaveChangesButton from "./SaveChangesButton";
+import Modal from "./Modal";
 
 export type PlanType = "Starter" | "Basic" | "Professional";
 
@@ -9,6 +11,7 @@ export default function PlansSection() {
 	const [currentPlan, setCurrentPlan] = useState<PlanType>("Starter");
 	const [previousPlan, setPreviousPlan] = useState<PlanType>("Starter");
 	const [isButtonEnabled, setIsButtonEnabled] = useState(false);
+	const [showModal, setShowModal] = useState(true);
 
 	useEffect(() => {
 		setIsButtonEnabled(currentPlan !== previousPlan);
@@ -17,9 +20,13 @@ export default function PlansSection() {
 	const handlePlanChange = (plan: PlanType) => {
 		setCurrentPlan(plan);
 	};
+
 	const handleSaveChanges = () => {
-		setPreviousPlan(currentPlan);
-		setIsButtonEnabled(false);
+		setShowModal(true);
+	};
+
+	const handleCloseModal = () => {
+		setShowModal(false);
 	};
 
 	return (
@@ -107,18 +114,12 @@ export default function PlansSection() {
 				/>
 			</div>
 			<div className="flex justify-end items-center gap-4 py-4">
-				<button
-					className={`w-44 flex justify-center px-5 py-3 rounded font-medium text-base focus:shadow-custom-blue ${
-						isButtonEnabled
-							? "bg-indigo-700 text-white hover:bg-indigo-800"
-							: "bg-neutral-100 text-neutral-400"
-					}`}
+				<SaveChangesButton
+					isEnabled={isButtonEnabled}
 					onClick={handleSaveChanges}
-					disabled={!isButtonEnabled}
-				>
-					Save Changes
-				</button>
+				/>
 			</div>
+			<Modal show={showModal} onClose={handleCloseModal} />
 		</div>
 	);
 }

@@ -1,18 +1,7 @@
 "use client";
 import PlansSection from "@/components/PlansSection";
-import Modal from "@/components/Modal";
-import { useState } from "react";
 
 export default function Home() {
-	const [showModal, setShowModal] = useState(true);
-
-	const handleSaveChanges = () => {
-		setShowModal(true);
-	};
-
-	const handleCloseModal = () => {
-		setShowModal(false);
-	};
 	return (
 		<div className="flex flex-col w-full gap-8 py-8 px-4 bg-white tablet:px-8 tablet:py-16 desktop:mx-auto desktop:max-w-7xl">
 			<div className="flex flex-col gap-2">
@@ -43,7 +32,6 @@ export default function Home() {
 					</div>
 				</div>
 			</div>
-			<Modal show={showModal} onClose={handleCloseModal} />
 		</div>
 	);
 }
