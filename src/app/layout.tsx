@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import CombinedProvider from "./providers/CombinedProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -12,7 +13,9 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en">
-			<body>{children}</body>
+			<body>
+				<CombinedProvider>{children}</CombinedProvider>
+			</body>
 		</html>
 	);
 }
