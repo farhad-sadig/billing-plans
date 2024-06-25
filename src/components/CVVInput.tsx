@@ -1,14 +1,34 @@
-import React from "react";
+import React, { useState } from "react";
+import ErrorMessage from "./ErrorMessage"; // Assuming the ErrorMessage component exists
+import { styleInputErrorAndFocus } from "@/utils/style";
 
 interface CVVInputProps {
 	cvv: string;
-	setCvv: React.Dispatch<React.SetStateAction<string>>;
+	setCvv: (value: string) => void;
 }
 
 const CVVInput: React.FC<CVVInputProps> = ({ cvv, setCvv }) => {
+	const [error, setError] = useState<string | null>(null);
+	const [isTouched, setIsTouched] = useState<boolean>(false);
+	const [isFocused, setIsFocused] = useState<boolean>(false);
+
 	const handleCvvChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const value = e.target.value.replace(/\D/g, ""); // Remove all non-digit characters
 		setCvv(value);
+	};
+
+	const handleBlur = () => {
+		setIsTouched(true);
+		setIsFocused(false);
+		if (!isValidCvv(cvv)) {
+			setError("Invalid CVV. Must be 3 or 4 digits.");
+		} else {
+			setError(null);
+		}
+	};
+
+	const handleFocus = () => {
+		setIsFocused(true);
 	};
 
 	const isValidCvv = (cvv: string) => {
@@ -16,7 +36,7 @@ const CVVInput: React.FC<CVVInputProps> = ({ cvv, setCvv }) => {
 	};
 
 	return (
-		<div className="flex flex-col gap-1.5 text-sm w-1/2">
+		<div className="flex flex-col gap-1.5 text-sm w-1/2 ml-4">
 			<label htmlFor="cvv" className="font-medium text-neutral-700">
 				CVV
 			</label>
@@ -27,15 +47,15 @@ const CVVInput: React.FC<CVVInputProps> = ({ cvv, setCvv }) => {
 				placeholder="123"
 				value={cvv}
 				onChange={handleCvvChange}
+				onFocus={handleFocus}
+				onBlur={handleBlur}
 				maxLength={4}
 				required
-				className="flex bg-neutral-50 px-3.5 py-2.5 rounded border border-solid border-neutral-200 font-normal text-neutral-500"
+				className={styleInputErrorAndFocus(Boolean(error), isFocused)}
 				pattern="\d{3,4}"
 				title="Enter 3 or 4 digit CVV"
 			/>
-			{!isValidCvv(cvv) && cvv.length > 0 && (
-				<span className="text-red-500 text-sm">Invalid CVV</span>
-			)}
+			{isTouched && error && <ErrorMessage message={error} />}
 		</div>
 	);
 };

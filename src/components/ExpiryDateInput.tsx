@@ -1,14 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
+import ErrorMessage from "./ErrorMessage"; // Assuming the ErrorMessage component exists
+import { styleInputErrorAndFocus } from "@/utils/style";
 
 interface ExpiryDateInputProps {
 	expiryDate: string;
-	setExpiryDate: React.Dispatch<React.SetStateAction<string>>;
+	setExpiryDate: (value: string) => void;
 }
 
 const ExpiryDateInput: React.FC<ExpiryDateInputProps> = ({
 	expiryDate,
 	setExpiryDate
 }) => {
+	const [error, setError] = useState<string | null>(null);
+	const [isTouched, setIsTouched] = useState<boolean>(false);
+	const [isFocused, setIsFocused] = useState<boolean>(false);
+
 	const handleExpiryDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const value = e.target.value;
 
@@ -19,6 +25,20 @@ const ExpiryDateInput: React.FC<ExpiryDateInputProps> = ({
 			.slice(0, 5); // Limit input to 5 characters
 
 		setExpiryDate(formattedValue);
+	};
+
+	const handleBlur = () => {
+		setIsTouched(true);
+		setIsFocused(false);
+		if (!isValidExpiryDate(expiryDate)) {
+			setError("Invalid expiry date.");
+		} else {
+			setError(null);
+		}
+	};
+
+	const handleFocus = () => {
+		setIsFocused(true);
 	};
 
 	const isValidExpiryDate = (date: string) => {
@@ -33,11 +53,10 @@ const ExpiryDateInput: React.FC<ExpiryDateInputProps> = ({
 	};
 
 	return (
-		<div className="flex flex-col gap-1.5 text-sm w-1/2">
+		<div className="flex flex-col gap-1.5 text-sm w-1/2 mr-4">
 			<label className="font-medium text-neutral-700" htmlFor="expiryDate">
 				Expiry
 			</label>
-
 			<input
 				type="text"
 				id="expiryDate"
@@ -45,15 +64,15 @@ const ExpiryDateInput: React.FC<ExpiryDateInputProps> = ({
 				placeholder="MM/YY"
 				value={expiryDate}
 				onChange={handleExpiryDateChange}
+				onFocus={handleFocus}
+				onBlur={handleBlur}
 				maxLength={5}
 				required
-				className="flex mr-4 bg-neutral-50 px-3.5 py-2.5 rounded border border-solid border-neutral-200 font-normal text-neutral-500"
+				className={styleInputErrorAndFocus(Boolean(error), isFocused)}
 				pattern="\d{2}/\d{2}"
 				title="Enter expiry date in MM/YY format"
 			/>
-			{!isValidExpiryDate(expiryDate) && expiryDate.length === 5 && (
-				<span className="text-red-500 text-sm">Invalid expiry date</span>
-			)}
+			{isTouched && error && <ErrorMessage message={error} />}
 		</div>
 	);
 };

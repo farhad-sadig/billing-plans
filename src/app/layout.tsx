@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import CombinedProvider from "./providers/CombinedProvider";
 import "./globals.css";
-
+import { PlanProvider } from "@/context/PlanContext";
 export const metadata: Metadata = {
 	title: "Billing Plans"
 };
@@ -14,7 +13,7 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<body>
-				<CombinedProvider>{children}</CombinedProvider>
+				<PlanProvider>{children}</PlanProvider>
 			</body>
 		</html>
 	);

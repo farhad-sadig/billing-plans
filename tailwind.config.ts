@@ -1,12 +1,10 @@
 import type { Config } from "tailwindcss";
-import { nextui } from "@nextui-org/react";
 
 const config: Config = {
 	content: [
 		"./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
 		"./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-		"./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-		"./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}"
+		"./src/app/**/*.{js,ts,jsx,tsx,mdx}"
 	],
 	theme: {
 		screens: {
@@ -16,10 +14,13 @@ const config: Config = {
 		},
 		extend: {
 			boxShadow: {
-				"custom-blue": "0px 0px 0px 4px rgba(68, 76, 231, 0.12)"
+				focused:
+					"0px 0px 0px 4px rgba(68, 76, 231, 0.12), 0px 1px 2px 0 rgba(16, 24, 40, 0.05), 0px 0px 0px 1px rgba(68, 76, 231, 1)",
+				"error-focused":
+					"0px 0px 0px 4px rgba(217, 45, 32, 0.12), 0px 0px 0px 1px rgba(217, 45, 32, 1)"
 			}
 		}
 	},
-	plugins: [nextui()]
+	plugins: []
 };
 export default config;

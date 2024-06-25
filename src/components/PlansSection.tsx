@@ -1,36 +1,37 @@
-"use client";
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
+import { usePlan } from "@/context/PlanContext";
 import { BasicPlanIcon, ProfessionalPlanIcon, StarterPlanIcon } from "./Icons";
 import RadioButton from "./RadioButton";
 import SaveChangesButton from "./SaveChangesButton";
 import Modal from "./Modal";
 
-export type PlanType = "Starter" | "Basic" | "Professional";
-
-export default function PlansSection() {
-	const [currentPlan, setCurrentPlan] = useState<PlanType>("Starter");
-	const [previousPlan, setPreviousPlan] = useState<PlanType>("Starter");
+const PlansSection: React.FC = () => {
+	const { plan } = usePlan();
+	const [currentPlan, setCurrentPlan] = useState(plan.planType);
 	const [isButtonEnabled, setIsButtonEnabled] = useState(false);
-	const [showModal, setShowModal] = useState(true);
+	const [showModal, setShowModal] = useState(false);
 
 	useEffect(() => {
-		setIsButtonEnabled(currentPlan !== previousPlan);
-	}, [currentPlan, previousPlan]);
+		setIsButtonEnabled(currentPlan !== plan.planType);
+	}, [currentPlan, plan.planType]);
 
-	const handlePlanChange = (plan: PlanType) => {
-		setCurrentPlan(plan);
+	const handlePlanChange = (planType: "Starter" | "Basic" | "Professional") => {
+		setCurrentPlan(planType);
 	};
 
 	const handleSaveChanges = () => {
 		setShowModal(true);
 	};
 
-	const handleCloseModal = () => {
-		setShowModal(false);
-	};
-
 	return (
-		<div className="flex flex-col gap-4 desktop:w-full">
+		<div className="flex flex-col gap-4 w-full">
+			{showModal && (
+				<Modal
+					show={showModal}
+					onClose={() => setShowModal(false)}
+					currentPlan={currentPlan}
+				/>
+			)}
 			<div
 				className={`flex items-start p-5 gap-5 rounded-lg border border-solid hover:bg-neutral-50 tablet:items-center ${
 					currentPlan === "Starter" ? "border-indigo-600" : "border-neutral-200"
@@ -43,19 +44,17 @@ export default function PlansSection() {
 							Starter • $0/month
 						</div>
 						<div className="font-normal text-sm text-neutral-600">
-							Includes up to 10 users, 20GB individual data and access to all
+							Includes up to 10 users, 20GB individual data, and access to all
 							features.
 						</div>
 					</div>
 				</div>
-
 				<RadioButton
 					value="Starter"
 					checked={currentPlan === "Starter"}
 					handlePlanChange={handlePlanChange}
 				/>
 			</div>
-
 			<div
 				className={`flex items-start p-5 gap-5 rounded-lg border border-solid hover:bg-neutral-50 tablet:items-center ${
 					currentPlan === "Basic" ? "border-indigo-600" : "border-neutral-200"
@@ -64,24 +63,15 @@ export default function PlansSection() {
 				<div className="flex flex-col items-start tablet:flex-row gap-5 tablet:items-center">
 					<BasicPlanIcon />
 					<div className="flex flex-col gap-2">
-						<div className="flex flex-col gap-3 tablet:flex-row tablet:items-center">
-							<div className="font-semibold text-lg text-neutral-900">
-								Basic plan • $6/month
-							</div>
-							<div className="mr-auto bg-green-50 px-2 py-0.5 rounded-full border border-solid border-green-200">
-								<span className="font-normal text-sm text-center text-green-700">
-									Recommended
-								</span>
-							</div>
+						<div className="font-semibold text-lg text-neutral-900">
+							Basic • $6/month
 						</div>
-
 						<div className="font-normal text-sm text-neutral-600">
-							Includes up to 20 users, 40GB individual data and access to all
+							Includes up to 20 users, 40GB individual data, and access to all
 							features.
 						</div>
 					</div>
 				</div>
-
 				<RadioButton
 					value="Basic"
 					checked={currentPlan === "Basic"}
@@ -99,10 +89,10 @@ export default function PlansSection() {
 					<ProfessionalPlanIcon />
 					<div className="flex flex-col gap-2">
 						<div className="font-semibold text-lg text-neutral-900">
-							Professional plan • $12/month
+							Professional • $12/month
 						</div>
 						<div className="font-normal text-sm text-neutral-600">
-							Includes up to 50 users, 100GB individual data and access to all
+							Includes up to 50 users, 100GB individual data, and access to all
 							features.
 						</div>
 					</div>
@@ -119,7 +109,8 @@ export default function PlansSection() {
 					onClick={handleSaveChanges}
 				/>
 			</div>
-			<Modal show={showModal} onClose={handleCloseModal} />
 		</div>
 	);
-}
+};
+
+export default PlansSection;

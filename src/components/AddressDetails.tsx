@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import ErrorMessage from "./ErrorMessage";
+import { styleInputErrorAndFocus } from "@/utils/style";
 
 const countries = [
 	{ code: "US", name: "United States" },
 	{ code: "CA", name: "Canada" }
-	// Add more countries as needed
 ];
 
 type States = {
@@ -16,117 +17,205 @@ const states: States = {
 		"Alaska",
 		"Arizona",
 		"Arkansas",
-		"California" /* ...more states */
+		"California",
+		"Florida",
+		"New York",
+		"Washington"
 	],
 	CA: [
 		"Alberta",
 		"British Columbia",
 		"Manitoba",
-		"New Brunswick" /* ...more provinces */
+		"New Brunswick",
+		"Ontario",
+		"Quebec",
+		"Saskatchewan"
 	]
-	// Add more states/provinces for other countries as needed
 };
 
-const AddressDetails: React.FC = () => {
-	const [country, setCountry] = useState<string>("US");
-	const [state, setState] = useState<string>("");
-	const [addressLine1, setAddressLine1] = useState<string>("");
-	const [addressLine2, setAddressLine2] = useState<string>("");
-	const [city, setCity] = useState<string>("");
-	const [zip, setZip] = useState<string>("");
+interface AddressDetailsProps {
+	address: {
+		country: string;
+		state: string;
+		addressLine1: string;
+		addressLine2: string;
+		city: string;
+		zip: string;
+	};
+	setAddress: (name: string, value: string) => void;
+}
+
+const AddressDetails: React.FC<AddressDetailsProps> = ({
+	address,
+	setAddress
+}) => {
+	const [errors, setErrors] = useState({
+		country: false,
+		state: false,
+		addressLine1: false,
+		city: false,
+		zip: false
+	});
+
+	const [focused, setFocused] = useState({
+		country: false,
+		state: false,
+		addressLine1: false,
+		addressLine2: false,
+		city: false,
+		zip: false
+	});
+
+	const handleBlur = (name: string, value: string) => {
+		setErrors((prevErrors) => ({
+			...prevErrors,
+			[name]: !value
+		}));
+		setFocused((prevFocused) => ({
+			...prevFocused,
+			[name]: false
+		}));
+	};
+
+	const handleFocus = (name: string) => {
+		setFocused((prevFocused) => ({
+			...prevFocused,
+			[name]: true
+		}));
+	};
+
+	const validateZip = (zip: string) => /^\d{5}(-\d{4})?$/.test(zip);
+
+	useEffect(() => {
+		setErrors((prevErrors) => ({
+			...prevErrors,
+			zip: address.zip ? !validateZip(address.zip) : false
+		}));
+	}, [address.zip]);
 
 	return (
-		<div className="flex flex-col gap-6 text-sm">
-			<div className="flex flex-col gap-1.5">
+		<div className="flex flex-col gap-6 text-sm mt-4">
+			<div className="flex flex-col gap-1.5 text-sm">
 				<label className="font-medium text-neutral-700" htmlFor="country">
-					Country/Region
+					Country / Region
 				</label>
 				<select
+					className={styleInputErrorAndFocus(errors.country, focused.country)}
 					id="country"
 					name="country"
-					value={country}
-					onChange={(e) => setCountry(e.target.value)}
+					value={address.country}
+					onChange={(e) => setAddress("country", e.target.value)}
+					onFocus={() => handleFocus("country")}
+					onBlur={(e) => handleBlur("country", e.target.value)}
+					required
 				>
+					<option value="" disabled>
+						Country
+					</option>
 					{countries.map((country) => (
 						<option key={country.code} value={country.code}>
 							{country.name}
 						</option>
 					))}
 				</select>
+				{errors.country && <ErrorMessage message="Country is required" />}
 			</div>
-			<div className="flex flex-col mb-4">
-				<label htmlFor="addressLine1" className="mb-2">
-					Address Line 1
+			<div className="flex flex-col gap-1.5 text-sm">
+				<label htmlFor="addressLine1" className="font-medium text-neutral-700">
+					Address
 				</label>
-				<input
-					type="text"
-					id="addressLine1"
-					name="addressLine1"
-					value={addressLine1}
-					onChange={(e) => setAddressLine1(e.target.value)}
-					required
-					className="w-full py-2 px-4 border rounded"
-				/>
+				<div className="flex flex-col gap-4">
+					<input
+						type="text"
+						id="addressLine1"
+						name="addressLine1"
+						placeholder="Street address"
+						value={address.addressLine1}
+						onChange={(e) => setAddress("addressLine1", e.target.value)}
+						onFocus={() => handleFocus("addressLine1")}
+						onBlur={(e) => handleBlur("addressLine1", e.target.value)}
+						required
+						className={styleInputErrorAndFocus(
+							errors.addressLine1,
+							focused.addressLine1
+						)}
+					/>
+					{errors.addressLine1 && (
+						<ErrorMessage message="Address is required" />
+					)}
+					<input
+						type="text"
+						id="addressLine2"
+						name="addressLine2"
+						placeholder="Apartment, suite, etc (optional)"
+						value={address.addressLine2}
+						onChange={(e) => setAddress("addressLine2", e.target.value)}
+						onFocus={() => handleFocus("addressLine2")}
+						onBlur={(e) => handleBlur("addressLine2", e.target.value)}
+						className={styleInputErrorAndFocus(false, focused.addressLine2)}
+					/>
+				</div>
 			</div>
-			<div className="flex flex-col mb-4">
-				<label htmlFor="addressLine2" className="mb-2">
-					Address Line 2 (Optional)
-				</label>
-				<input
-					type="text"
-					id="addressLine2"
-					name="addressLine2"
-					value={addressLine2}
-					onChange={(e) => setAddressLine2(e.target.value)}
-					className="w-full py-2 px-4 border rounded"
-				/>
-			</div>
-			<div className="flex flex-col mb-4">
-				<label htmlFor="city" className="mb-2">
-					City
-				</label>
-				<input
-					type="text"
-					id="city"
-					name="city"
-					value={city}
-					onChange={(e) => setCity(e.target.value)}
-					required
-					className="w-full py-2 px-4 border rounded"
-				/>
-			</div>
-			<div className="flex flex-col mb-4">
-				<label htmlFor="state" className="mb-2">
-					State
-				</label>
-				<select
-					id="state"
-					name="state"
-					value={state}
-					onChange={(e) => setState(e.target.value)}
-					className="w-full py-2 px-4 border rounded"
-					required
-				>
-					{states[country]?.map((state, index) => (
-						<option key={index} value={state}>
-							{state}
+			<div className="flex gap-8 text-sm">
+				<div className="flex flex-col gap-1.5 w-1/3">
+					<label htmlFor="city" className="font-medium text-neutral-700">
+						City
+					</label>
+					<input
+						type="text"
+						id="city"
+						name="city"
+						value={address.city}
+						onChange={(e) => setAddress("city", e.target.value)}
+						onFocus={() => handleFocus("city")}
+						onBlur={(e) => handleBlur("city", e.target.value)}
+						required
+						className={styleInputErrorAndFocus(errors.city, focused.city)}
+					/>
+					{errors.city && <ErrorMessage message="City is required" />}
+				</div>
+				<div className="flex flex-col gap-1.5 w-1/3">
+					<label htmlFor="state" className="font-medium text-neutral-700">
+						State
+					</label>
+					<select
+						id="state"
+						name="state"
+						value={address.state}
+						onChange={(e) => setAddress("state", e.target.value)}
+						onFocus={() => handleFocus("state")}
+						onBlur={(e) => handleBlur("state", e.target.value)}
+						className={styleInputErrorAndFocus(errors.state, focused.state)}
+						required
+					>
+						<option value="" disabled>
+							State
 						</option>
-					))}
-				</select>
-			</div>
-			<div className="flex flex-col mb-4">
-				<label htmlFor="zip" className="mb-2">
-					ZIP
-				</label>
-				<input
-					type="text"
-					id="zip"
-					name="zip"
-					value={zip}
-					onChange={(e) => setZip(e.target.value)}
-					required
-					className="w-full py-2 px-4 border rounded"
-				/>
+						{states[address.country]?.map((state, index) => (
+							<option key={index} value={state}>
+								{state}
+							</option>
+						))}
+					</select>
+					{errors.state && <ErrorMessage message="State is required" />}
+				</div>
+				<div className="flex flex-col gap-1.5 w-1/3">
+					<label htmlFor="zip" className="font-medium text-neutral-700">
+						ZIP
+					</label>
+					<input
+						type="text"
+						id="zip"
+						name="zip"
+						value={address.zip}
+						onChange={(e) => setAddress("zip", e.target.value)}
+						onFocus={() => handleFocus("zip")}
+						onBlur={(e) => handleBlur("zip", e.target.value)}
+						required
+						className={styleInputErrorAndFocus(errors.zip, focused.zip)}
+					/>
+					{errors.zip && <ErrorMessage message="Invalid ZIP code" />}
+				</div>
 			</div>
 		</div>
 	);

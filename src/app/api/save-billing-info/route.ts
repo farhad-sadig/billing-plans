@@ -2,71 +2,72 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@vercel/postgres";
 
 export async function POST(request: NextRequest) {
-	const {
-		userId,
-		cardNumber,
-		cardholderName,
-		expiry,
-		cvv,
-		country,
-		address,
-		city,
-		state,
-		zip
-	} = await request.json();
-
-	if (
-		!userId ||
-		!cardNumber ||
-		!cardholderName ||
-		!expiry ||
-		!cvv ||
-		!country ||
-		!address ||
-		!city ||
-		!state ||
-		!zip
-	) {
-		return NextResponse.json(
-			{ error: "All fields are required" },
-			{ status: 400 }
-		);
-	}
-
 	try {
+		const body = await request.json();
+		console.log("Request body:", body);
+
+		const {
+			name,
+			email,
+			planType,
+			cardNumber,
+			cardholderName,
+			expiryDate,
+			cvv,
+			address: { country, state, addressLine1, addressLine2 = "", city, zip }
+		} = body;
+
+		if (
+			!name ||
+			!email ||
+			!planType ||
+			!cardNumber ||
+			!cardholderName ||
+			!expiryDate ||
+			!cvv ||
+			!country ||
+			!state ||
+			!addressLine1 ||
+			!city ||
+			!zip
+		) {
+			console.log("Missing required fields");
+			return NextResponse.json(
+				{ error: "All fields except addressLine2 are required" },
+				{ status: 400 }
+			);
+		}
+
 		const client = await db.connect();
 
+		console.log("Inserting billing info...");
 		await client.query(
 			`
-      INSERT INTO billing_info (user_id, card_number, cardholder_name, expiry, cvv, country, address, city, state, zip)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      INSERT INTO billing_info (name, email, plan_type, card_number, cardholder_name, expiry, cvv, country, address_line1, address_line2, city, state, zip)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, COALESCE(NULLIF($10, ''), NULL), $11, $12, $13)
     `,
 			[
-				userId,
+				name,
+				email,
+				planType,
 				cardNumber,
 				cardholderName,
-				expiry,
+				expiryDate,
 				cvv,
 				country,
-				address,
+				addressLine1,
+				addressLine2,
 				city,
 				state,
 				zip
 			]
 		);
 
-		await client.query(
-			`
-      INSERT INTO subscriptions (user_id, plan_type)
-      VALUES ($1, 'Basic')
-    `,
-			[userId]
-		);
-
 		client.release();
+		console.log("Billing info saved successfully");
 
 		return NextResponse.json({
-			message: "Billing info and subscription saved successfully"
+			message: "Billing info saved successfully"
 		});
 	} catch (error) {
 		console.error("Error saving billing info:", error);
