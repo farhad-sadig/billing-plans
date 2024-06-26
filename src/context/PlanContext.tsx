@@ -1,82 +1,78 @@
 "use client";
 import React, { createContext, useState, useContext, ReactNode } from "react";
 
-interface User {
+export interface Plan {
 	id: string;
-	name: string;
-	email: string;
+	name: "Starter" | "Basic" | "Professional";
+	monthlyRate: number;
 }
 
-interface Plan {
-	planType: "Starter" | "Basic" | "Professional";
-	planRate: number;
-	nextBillingDate: string;
-	planExpiry: string;
+interface Subscription {
+	plan: Plan;
+	startDate: string;
+	nextBillingDate: string | null;
+	status: string;
+	email: string;
+	endDate: string | null;
 }
 
 interface PlanContextType {
-	user: User;
-	plan: Plan;
-	updatePlan: (plan: Plan) => void;
-	resetPlan: () => void;
-	updateUser: (user: User) => void;
-	resetUser: () => void;
+	subscription: Subscription;
+	updatePlan: (newPlan: Plan, email: string, endDate?: string | null) => void;
 }
+
+const defaultPlan: Plan = {
+	id: "starter",
+	name: "Starter",
+	monthlyRate: 0
+};
+
+const defaultSubscription: Subscription = {
+	plan: defaultPlan,
+	startDate: new Date().toISOString(),
+	nextBillingDate: null,
+	status: "active",
+	email: "",
+	endDate: null
+};
 
 const PlanContext = createContext<PlanContextType | undefined>(undefined);
 
 export const PlanProvider: React.FC<{ children: ReactNode }> = ({
 	children
 }) => {
-	const [user, setUser] = useState<User>({
-		id: "",
-		name: "",
-		email: ""
-	});
+	const [subscription, setSubscription] =
+		useState<Subscription>(defaultSubscription);
 
-	const [plan, setPlan] = useState<Plan>({
-		planType: "Starter",
-		planRate: 0,
-		nextBillingDate: "",
-		planExpiry: ""
-	});
+	const updatePlan = (
+		newPlan: Plan,
+		email: string,
+		endDate: string | null = null
+	) => {
+		const newSubscription: Subscription = {
+			plan: newPlan,
+			startDate: new Date().toISOString(),
+			nextBillingDate:
+				newPlan.name !== "Starter"
+					? new Date(
+							new Date().setMonth(new Date().getMonth() + 1)
+					  ).toISOString()
+					: null,
+			status: "active",
+			email: email,
+			endDate: null
+		};
 
-	const updatePlan = (newPlan: Plan) => {
-		setPlan(newPlan);
-	};
+		if (endDate) {
+			newSubscription.status = "downgraded";
+			newSubscription.endDate = endDate;
+		}
 
-	const resetPlan = () => {
-		setPlan({
-			planType: "Starter",
-			planRate: 0,
-			nextBillingDate: "",
-			planExpiry: ""
-		});
-	};
-
-	const updateUser = (newUser: User) => {
-		setUser(newUser);
-	};
-
-	const resetUser = () => {
-		setUser({
-			id: "",
-			name: "",
-			email: ""
-		});
+		setSubscription(newSubscription);
 	};
 
 	return (
-		<PlanContext.Provider
-			value={{
-				user,
-				plan,
-				updatePlan,
-				resetPlan,
-				updateUser,
-				resetUser
-			}}
-		>
+		<PlanContext.Provider value={{ subscription, updatePlan }}>
 			{children}
 		</PlanContext.Provider>
 	);

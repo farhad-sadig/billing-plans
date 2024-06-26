@@ -1,53 +1,38 @@
+"use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { usePlan } from "@/context/PlanContext";
+import { usePlan, Plan } from "@/context/PlanContext";
+import { CloseModalIcon } from "./Icons";
 
 interface ModalProps {
 	show: boolean;
 	onClose: () => void;
-	currentPlan: "Starter" | "Basic" | "Professional";
+	currentPlan: Plan["name"];
+	onConfirm: () => void;
+	email: string;
 }
 
-const Modal: React.FC<ModalProps> = ({ show, onClose, currentPlan }) => {
+const Modal: React.FC<ModalProps> = ({
+	show,
+	onClose,
+	currentPlan,
+	onConfirm,
+	email
+}) => {
 	const [billingInfoExists, setBillingInfoExists] = useState(true);
 	const [loading, setLoading] = useState(false);
-	const { user, plan, updatePlan } = usePlan();
+	const { updatePlan } = usePlan();
 	const router = useRouter();
 
 	const handleConfirm = async () => {
 		setLoading(true);
 		try {
-			const response = await fetch(
-				`/api/check-billing-info?email=${user.email}`
-			);
+			const response = await fetch(`/api/check-billing-info?email=${email}`);
 			if (response.ok) {
 				const data = await response.json();
 				if (data.exists) {
-					const newPlanRate = currentPlan === "Basic" ? 6 : 12;
-					const newPlanExpiry = new Date(); // Set the new plan expiry date
-					newPlanExpiry.setMonth(newPlanExpiry.getMonth() + 1); // Example: 1 month later
-
-					const updateResponse = await fetch(`/api/update-plan`, {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json"
-						},
-						body: JSON.stringify({
-							email: user.email,
-							planType: currentPlan,
-							planRate: newPlanRate,
-							planExpiry: newPlanExpiry.toISOString()
-						})
-					});
-
-					if (updateResponse.ok) {
-						const updatedPlan = await updateResponse.json();
-						updatePlan(updatedPlan);
-						console.log("Plan updated successfully");
-						onClose();
-					} else {
-						console.error("Error updating plan:", updateResponse.statusText);
-					}
+					onConfirm();
+					onClose();
 				} else {
 					setBillingInfoExists(false);
 				}
@@ -74,21 +59,10 @@ const Modal: React.FC<ModalProps> = ({ show, onClose, currentPlan }) => {
 									Upgrade your plan to the {currentPlan} plan?
 								</span>
 								<button
-									className="w-6 h-6 flex justify-center items-center"
+									className="w-6 h-6 flex justify-center items-start"
 									onClick={onClose}
 								>
-									<svg
-										width="11"
-										height="12"
-										viewBox="0 0 11 12"
-										fill="none"
-										xmlns="http://www.w3.org/2000/svg"
-									>
-										<path
-											d="M5.50058 4.82208L9.62533 0.697266L10.8038 1.87577L6.67908 6.00058L10.8038 10.1253L9.62533 11.3038L5.50058 7.17908L1.37577 11.3038L0.197266 10.1253L4.32208 6.00058L0.197266 1.87577L1.37577 0.697266L5.50058 4.82208Z"
-											fill="#525252"
-										/>
-									</svg>
+									<CloseModalIcon />
 								</button>
 							</div>
 							<span className="font-normal text-sm text-neutral-600 mt-1">
@@ -115,26 +89,15 @@ const Modal: React.FC<ModalProps> = ({ show, onClose, currentPlan }) => {
 				) : (
 					<>
 						<div className="flex flex-col gap-1">
-							<div className="flex justify-between items-center">
+							<div className="flex justify-between">
 								<span className="font-semibold text-lg text-neutral-900">
 									Oops, no billing information found
 								</span>
 								<button
-									className="w-6 h-6 flex justify-center items-center"
+									className="w-6 h-6 flex justify-center items-start"
 									onClick={onClose}
 								>
-									<svg
-										width="11"
-										height="12"
-										viewBox="0 0 11 12"
-										fill="none"
-										xmlns="http://www.w3.org/2000/svg"
-									>
-										<path
-											d="M5.50058 4.82208L9.62533 0.697266L10.8038 1.87577L6.67908 6.00058L10.8038 10.1253L9.62533 11.3038L5.50058 7.17908L1.37577 11.3038L0.197266 10.1253L4.32208 6.00058L0.197266 1.87577L1.37577 0.697266L5.50058 4.82208Z"
-											fill="#525252"
-										/>
-									</svg>
+									<CloseModalIcon />
 								</button>
 							</div>
 							<span className="font-normal text-sm text-neutral-600 mt-1">
@@ -143,7 +106,7 @@ const Modal: React.FC<ModalProps> = ({ show, onClose, currentPlan }) => {
 						</div>
 						<div className="flex justify-center">
 							<button
-								className="bg-indigo-700 w-full px-4 py-2.5 text-white rounded ml-[6px] hover:bg-indigo-800 focus:bg-indigo-800"
+								className="bg-indigo-700 w-full px-4 py-2.5 text-white rounded hover:bg-indigo-800 focus:bg-indigo-800"
 								onClick={() => {
 									onClose();
 									router.push("/billing");

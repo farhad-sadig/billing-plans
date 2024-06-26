@@ -1,26 +1,39 @@
 import React, { useState, useEffect } from "react";
-import { usePlan } from "@/context/PlanContext";
+import { usePlan, Plan } from "@/context/PlanContext";
 import { BasicPlanIcon, ProfessionalPlanIcon, StarterPlanIcon } from "./Icons";
 import RadioButton from "./RadioButton";
 import SaveChangesButton from "./SaveChangesButton";
 import Modal from "./Modal";
 
 const PlansSection: React.FC = () => {
-	const { plan } = usePlan();
-	const [currentPlan, setCurrentPlan] = useState(plan.planType);
+	const { subscription, updatePlan } = usePlan();
+	const [currentPlan, setCurrentPlan] = useState(subscription.plan.name);
 	const [isButtonEnabled, setIsButtonEnabled] = useState(false);
 	const [showModal, setShowModal] = useState(false);
 
-	useEffect(() => {
-		setIsButtonEnabled(currentPlan !== plan.planType);
-	}, [currentPlan, plan.planType]);
+	const email = subscription.email; // This should be replaced with actual user email in real use case
 
-	const handlePlanChange = (planType: "Starter" | "Basic" | "Professional") => {
+	useEffect(() => {
+		setIsButtonEnabled(currentPlan !== subscription.plan.name);
+	}, [currentPlan, subscription.plan.name]);
+
+	const handlePlanChange = (planType: Plan["name"]) => {
 		setCurrentPlan(planType);
 	};
 
 	const handleSaveChanges = () => {
 		setShowModal(true);
+	};
+
+	const handleConfirmChange = () => {
+		const newPlan: Plan = {
+			id: currentPlan.toLowerCase(),
+			name: currentPlan,
+			monthlyRate:
+				currentPlan === "Basic" ? 6 : currentPlan === "Professional" ? 12 : 0
+		};
+		updatePlan(newPlan, email);
+		setShowModal(false);
 	};
 
 	return (
@@ -30,6 +43,8 @@ const PlansSection: React.FC = () => {
 					show={showModal}
 					onClose={() => setShowModal(false)}
 					currentPlan={currentPlan}
+					onConfirm={handleConfirmChange}
+					email={email}
 				/>
 			)}
 			<div

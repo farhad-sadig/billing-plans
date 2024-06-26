@@ -5,18 +5,27 @@ async function main() {
 	const client = await db.connect();
 
 	try {
-		// Drop existing table
+		// Drop existing tables
 		await client.query(`DROP TABLE IF EXISTS billing_info`);
+		await client.query(`DROP TABLE IF EXISTS plans`);
 
-		// Create a single table with all the information
+		// Create Plans table
+		await client.query(`
+      CREATE TABLE IF NOT EXISTS plans (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(50) NOT NULL CHECK (name IN ('Starter', 'Basic', 'Professional')),
+        monthly_rate DECIMAL(10, 2) NOT NULL
+      );
+    `);
+
+		// Create BillingInfo table
 		await client.query(`
       CREATE TABLE IF NOT EXISTS billing_info (
         id SERIAL PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
         email VARCHAR(255) UNIQUE NOT NULL,
-        plan_type VARCHAR(50) NOT NULL CHECK (plan_type IN ('Starter', 'Basic', 'Professional')),
-        plan_rate DECIMAL(10, 2) NOT NULL,
-        plan_expiry TIMESTAMP,
+        plan_id INTEGER NOT NULL,
+        next_billing_date TIMESTAMP DEFAULT NULL,
+        plan_expiry TIMESTAMP DEFAULT NULL,
         card_number VARCHAR(16) NOT NULL,
         cardholder_name VARCHAR(255) NOT NULL,
         expiry VARCHAR(5) NOT NULL,
@@ -27,21 +36,54 @@ async function main() {
         city VARCHAR(255) NOT NULL,
         state VARCHAR(255) NOT NULL,
         zip VARCHAR(10) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (plan_id) REFERENCES plans(id)
       );
     `);
 
-		console.log("Seed data created successfully.");
+		// Insert sample plans
+		await client.query(`
+      INSERT INTO plans (name, monthly_rate) VALUES 
+      ('Starter', 0.00),
+      ('Basic', 6.00),
+      ('Professional', 12.00);
+    `);
+
+		// Insert sample billing info
+		const plans = await client.query("SELECT id, name FROM plans");
+
+		await client.query(`
+      INSERT INTO billing_info (email, plan_id, next_billing_date, card_number, cardholder_name, expiry, cvv, country, address_line1, address_line2, city, state, zip)
+      VALUES
+      ('john@example.com', ${plans.rows[1].id}, '${new Date(
+			new Date().setMonth(new Date().getMonth() + 1)
+		).toISOString()}', '1234567890123456', 'John Doe', '12/23', '123', 'US', '123 Main St', '', 'Anytown', 'Anystate', '12345'),
+      ('jane@example.com', ${plans.rows[2].id}, '${new Date(
+			new Date().setMonth(new Date().getMonth() + 1)
+		).toISOString()}', '6543210987654321', 'Jane Smith', '01/24', '321', 'US', '456 Elm St', '', 'Othertown', 'Otherstate', '67890');
+    `);
+
+		console.log("Tables created and sample data inserted successfully.");
 	} catch (error) {
-		console.error("Error seeding data:", error);
+		if (error instanceof Error) {
+			console.error("Error creating tables or inserting data:", error.message);
+			console.error("Stack trace:", error.stack);
+		} else {
+			console.error("Unexpected error:", error);
+		}
 	} finally {
 		client.release();
 	}
 }
 
 main().catch((err) => {
-	console.error(
-		"An error occurred while attempting to seed the database:",
-		err
-	);
+	if (err instanceof Error) {
+		console.error(
+			"An error occurred while attempting to seed the database:",
+			err.message
+		);
+		console.error("Stack trace:", err.stack);
+	} else {
+		console.error("Unexpected error:", err);
+	}
 });

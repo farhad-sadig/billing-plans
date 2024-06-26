@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useCallback, useRef } from "react";
+import { usePlan } from "@/context/PlanContext";
 import CardNumberInput from "./CardNumberInput";
 import CardholderNameInput from "./CardholderNameInput";
 import ExpiryDateInput from "./ExpiryDateInput";
@@ -9,12 +10,13 @@ import SaveChangesButton from "./SaveChangesButton";
 import EmailInput from "./EmailInput";
 
 const BillingForm: React.FC = () => {
+	const { subscription, updatePlan } = usePlan();
 	const [formState, setFormState] = useState({
 		cardNumber: "",
 		cardholderName: "",
 		expiry: "",
 		cvv: "",
-		email: "",
+		email: subscription.email || "",
 		address: {
 			country: "",
 			state: "",
@@ -61,15 +63,18 @@ const BillingForm: React.FC = () => {
 							"Content-Type": "application/json"
 						},
 						body: JSON.stringify({
-							name: "123",
 							...formState,
-							address: formState.address
+							planType: subscription.plan.name,
+							planRate: subscription.plan.monthlyRate,
+							planExpiry: subscription.nextBillingDate
 						})
 					});
 
 					if (response.ok) {
 						const data = await response.json();
 						console.log("Response:", data);
+						// Optionally update the context with new plan details if needed
+						updatePlan(subscription.plan, formState.email);
 					} else {
 						console.error("Error:", response.statusText);
 					}
@@ -78,8 +83,9 @@ const BillingForm: React.FC = () => {
 				}
 			}
 		},
-		[formState, isFormValid]
+		[formState, isFormValid, subscription, updatePlan]
 	);
+
 	const handleClick = useCallback(() => {
 		if (formRef.current) {
 			formRef.current.requestSubmit();
@@ -137,7 +143,6 @@ const BillingForm: React.FC = () => {
 					setEmail={(value) => setFormState({ ...formState, email: value })}
 				/>
 				<hr className="h-px bg-neutral-200" />
-
 				<span className="font-medium text-base text-neutral-900">
 					Address details
 				</span>
