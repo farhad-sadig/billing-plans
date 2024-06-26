@@ -1,5 +1,11 @@
 "use client";
-import React, { createContext, useState, useContext, ReactNode } from "react";
+import React, {
+	createContext,
+	useState,
+	useContext,
+	ReactNode,
+	useEffect
+} from "react";
 
 export interface Plan {
 	id: string;
@@ -44,26 +50,39 @@ export const PlanProvider: React.FC<{ children: ReactNode }> = ({
 	const [subscription, setSubscription] =
 		useState<Subscription>(defaultSubscription);
 
+	useEffect(() => {
+		const savedSubscription = localStorage.getItem("subscription");
+		if (savedSubscription) {
+			setSubscription(JSON.parse(savedSubscription));
+		}
+	}, []);
+
+	useEffect(() => {
+		localStorage.setItem("subscription", JSON.stringify(subscription));
+	}, [subscription]);
+
 	const updatePlan = (
 		newPlan: Plan,
 		email: string,
 		endDate: string | null = null
 	) => {
+		const isDowngrade =
+			newPlan.name === "Starter" && subscription.plan.name !== "Starter";
+
 		const newSubscription: Subscription = {
 			plan: newPlan,
 			startDate: new Date().toISOString(),
-			nextBillingDate:
-				newPlan.name !== "Starter"
-					? new Date(
-							new Date().setMonth(new Date().getMonth() + 1)
-					  ).toISOString()
-					: null,
+			nextBillingDate: isDowngrade
+				? subscription.nextBillingDate
+				: new Date(
+						new Date().setMonth(new Date().getMonth() + 1)
+				  ).toISOString(),
 			status: "active",
 			email: email,
 			endDate: null
 		};
 
-		if (endDate) {
+		if (isDowngrade && endDate) {
 			newSubscription.status = "downgraded";
 			newSubscription.endDate = endDate;
 		}

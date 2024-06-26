@@ -1,10 +1,10 @@
 import React from "react";
-import { PlanType } from "./PlansSection";
+import { Plan } from "@/context/PlanContext";
 
 interface RadioButtonProps {
-	value: PlanType;
+	value: Plan["name"];
 	checked: boolean;
-	handlePlanChange: (plan: PlanType) => void;
+	handlePlanChange: (plan: Plan["name"]) => void;
 }
 
 const RadioButton: React.FC<RadioButtonProps> = ({

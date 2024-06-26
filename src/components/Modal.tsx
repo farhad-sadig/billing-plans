@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { usePlan, Plan } from "@/context/PlanContext";
-import { CloseModalIcon } from "./Icons";
+import CloseButton from "./CloseButton";
 
 interface ModalProps {
 	show: boolean;
@@ -21,7 +21,6 @@ const Modal: React.FC<ModalProps> = ({
 }) => {
 	const [billingInfoExists, setBillingInfoExists] = useState(true);
 	const [loading, setLoading] = useState(false);
-	const { updatePlan } = usePlan();
 	const router = useRouter();
 
 	const handleConfirm = async () => {
@@ -58,12 +57,7 @@ const Modal: React.FC<ModalProps> = ({
 								<span className="font-semibold text-lg text-neutral-900">
 									Upgrade your plan to the {currentPlan} plan?
 								</span>
-								<button
-									className="w-6 h-6 flex justify-center items-start"
-									onClick={onClose}
-								>
-									<CloseModalIcon />
-								</button>
+								<CloseButton onClose={onClose} />
 							</div>
 							<span className="font-normal text-sm text-neutral-600 mt-1">
 								This will take effect immediately. You will be charged{" "}
@@ -93,12 +87,7 @@ const Modal: React.FC<ModalProps> = ({
 								<span className="font-semibold text-lg text-neutral-900">
 									Oops, no billing information found
 								</span>
-								<button
-									className="w-6 h-6 flex justify-center items-start"
-									onClick={onClose}
-								>
-									<CloseModalIcon />
-								</button>
+								<CloseButton onClose={onClose} />
 							</div>
 							<span className="font-normal text-sm text-neutral-600 mt-1">
 								Please add your billing details to begin upgrading your plan.

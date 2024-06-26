@@ -8,6 +8,7 @@ import CVVInput from "./CVVInput";
 import AddressDetails from "./AddressDetails";
 import SaveChangesButton from "./SaveChangesButton";
 import EmailInput from "./EmailInput";
+import { useRouter } from "next/navigation";
 
 const BillingForm: React.FC = () => {
 	const { subscription, updatePlan } = usePlan();
@@ -26,7 +27,8 @@ const BillingForm: React.FC = () => {
 			zip: ""
 		}
 	});
-
+	const [processing, setProcessing] = useState(false);
+	const router = useRouter();
 	const isFormValid = Boolean(
 		formState.cardNumber &&
 			formState.cardholderName &&
@@ -57,6 +59,7 @@ const BillingForm: React.FC = () => {
 			e.preventDefault();
 			if (isFormValid) {
 				try {
+					setProcessing(true);
 					const response = await fetch("/api/save-billing-info", {
 						method: "POST",
 						headers: {
@@ -73,8 +76,11 @@ const BillingForm: React.FC = () => {
 					if (response.ok) {
 						const data = await response.json();
 						console.log("Response:", data);
-						// Optionally update the context with new plan details if needed
 						updatePlan(subscription.plan, formState.email);
+						setTimeout(() => {
+							setProcessing(false);
+							router.push("/");
+						}, 2000);
 					} else {
 						console.error("Error:", response.statusText);
 					}
@@ -83,7 +89,7 @@ const BillingForm: React.FC = () => {
 				}
 			}
 		},
-		[formState, isFormValid, subscription, updatePlan]
+		[formState, isFormValid, subscription, updatePlan, router]
 	);
 
 	const handleClick = useCallback(() => {
@@ -94,6 +100,11 @@ const BillingForm: React.FC = () => {
 
 	return (
 		<div className="flex flex-col gap-4 bg-white py-16 px-4">
+			{processing && (
+				<div className="fixed inset-0 flex items-center justify-center bg-neutral-950 bg-opacity-75 z-10">
+					Show Processing Modal
+				</div>
+			)}
 			<div className="flex flex-col gap-2 mt-4">
 				<span className="font-semibold text-xl text-neutral-900">
 					Billing Information
