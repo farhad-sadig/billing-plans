@@ -1,4 +1,5 @@
 "use client";
+import { PlanChangeType } from "@/components/PlansSection";
 import React, {
 	createContext,
 	useState,
@@ -8,86 +9,94 @@ import React, {
 } from "react";
 
 export interface Plan {
-	id: string;
 	name: "Starter" | "Basic" | "Professional";
 	monthlyRate: number;
 }
 
 interface Subscription {
 	plan: Plan;
-	startDate: string;
 	nextBillingDate: string | null;
-	status: string;
-	email: string;
-	endDate: string | null;
+	email: string | null;
 }
 
 interface PlanContextType {
-	subscription: Subscription;
-	updatePlan: (newPlan: Plan, email: string, endDate?: string | null) => void;
+	subscription: Subscription | null;
+	updatePlan: (
+		newPlanName: string,
+		email: string,
+		planChange: PlanChangeType
+	) => void;
 }
-
-const defaultPlan: Plan = {
-	id: "starter",
-	name: "Starter",
-	monthlyRate: 0
-};
-
-const defaultSubscription: Subscription = {
-	plan: defaultPlan,
-	startDate: new Date().toISOString(),
-	nextBillingDate: null,
-	status: "active",
-	email: "",
-	endDate: null
-};
 
 const PlanContext = createContext<PlanContextType | undefined>(undefined);
 
 export const PlanProvider: React.FC<{ children: ReactNode }> = ({
 	children
 }) => {
-	const [subscription, setSubscription] =
-		useState<Subscription>(defaultSubscription);
+	const [subscription, setSubscription] = useState<Subscription | null>(null);
 
 	useEffect(() => {
-		const savedSubscription = localStorage.getItem("subscription");
-		if (savedSubscription) {
-			setSubscription(JSON.parse(savedSubscription));
+		if (subscription?.email) {
+			const fetchSubscription = async () => {
+				try {
+					const response = await fetch(
+						`/api/subscription?email=${subscription.email}`
+					);
+					if (!response.ok) {
+						throw new Error("Failed to fetch subscription data");
+					}
+					const data = await response.json();
+					setSubscription(data);
+				} catch (error) {
+					console.error("Failed to fetch subscription data", error);
+				}
+			};
+
+			fetchSubscription();
 		}
-	}, []);
+	}, [subscription?.email]);
 
-	useEffect(() => {
-		localStorage.setItem("subscription", JSON.stringify(subscription));
-	}, [subscription]);
-
-	const updatePlan = (
-		newPlan: Plan,
+	const updatePlan = async (
+		newPlanName: string,
 		email: string,
-		endDate: string | null = null
+		planChangeType: PlanChangeType
 	) => {
-		const isDowngrade =
-			newPlan.name === "Starter" && subscription.plan.name !== "Starter";
+		try {
+			const planResponse = await fetch(`/api/plan/${newPlanName}`);
+			if (!planResponse.ok) {
+				throw new Error("Failed to fetch plan data");
+			}
+			const newPlan: Plan = await planResponse.json();
 
-		const newSubscription: Subscription = {
-			plan: newPlan,
-			startDate: new Date().toISOString(),
-			nextBillingDate: isDowngrade
-				? subscription.nextBillingDate
-				: new Date(
-						new Date().setMonth(new Date().getMonth() + 1)
-				  ).toISOString(),
-			status: "active",
-			email: email,
-			endDate: null
-		};
+			const nextBillingDate =
+				planChangeType === "upgrade"
+					? new Date(
+							new Date().setMonth(new Date().getMonth() + 1)
+					  ).toISOString()
+					: subscription!.nextBillingDate;
 
-		if (isDowngrade && endDate) {
-			newSubscription.status = "downgraded";
-			newSubscription.endDate = endDate;
+			const newSubscription: Subscription = {
+				plan: newPlan,
+				nextBillingDate: nextBillingDate,
+				email: email
+			};
+
+			const response = await fetch("/api/subscription", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(newSubscription)
+			});
+
+			if (!response.ok) {
+				throw new Error("Failed to update subscription");
+			}
+
+			setSubscription(newSubscription);
+		} catch (error) {
+			console.error("Failed to update subscription", error);
 		}
-
-		setSubscription(newSubscription);
 	};
 
 	return (

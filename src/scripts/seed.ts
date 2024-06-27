@@ -5,25 +5,21 @@ async function main() {
 	const client = await db.connect();
 
 	try {
-		// Drop existing tables
 		await client.query(`DROP TABLE IF EXISTS billing_info`);
 		await client.query(`DROP TABLE IF EXISTS plans`);
 
-		// Create Plans table
 		await client.query(`
       CREATE TABLE IF NOT EXISTS plans (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(50) NOT NULL CHECK (name IN ('Starter', 'Basic', 'Professional')),
+        name VARCHAR(50) PRIMARY KEY CHECK (name IN ('Starter', 'Basic', 'Professional')),
         monthly_rate DECIMAL(10, 2) NOT NULL
       );
     `);
 
-		// Create BillingInfo table
 		await client.query(`
       CREATE TABLE IF NOT EXISTS billing_info (
         id SERIAL PRIMARY KEY,
         email VARCHAR(255) UNIQUE NOT NULL,
-        plan_id INTEGER NOT NULL,
+        plan_name VARCHAR(50) NOT NULL,
         next_billing_date TIMESTAMP DEFAULT NULL,
         plan_expiry TIMESTAMP DEFAULT NULL,
         card_number VARCHAR(16) NOT NULL,
@@ -37,7 +33,7 @@ async function main() {
         state VARCHAR(255) NOT NULL,
         zip VARCHAR(10) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (plan_id) REFERENCES plans(id)
+        FOREIGN KEY (plan_name) REFERENCES plans(name)
       );
     `);
 
@@ -50,17 +46,15 @@ async function main() {
     `);
 
 		// Insert sample billing info
-		const plans = await client.query("SELECT id, name FROM plans");
-
 		await client.query(`
-      INSERT INTO billing_info (email, plan_id, next_billing_date, card_number, cardholder_name, expiry, cvv, country, address_line1, address_line2, city, state, zip)
+      INSERT INTO billing_info (email, plan_name, next_billing_date, card_number, cardholder_name, expiry, cvv, country, address_line1, address_line2, city, state, zip)
       VALUES
-      ('john@example.com', ${plans.rows[1].id}, '${new Date(
-			new Date().setMonth(new Date().getMonth() + 1)
-		).toISOString()}', '1234567890123456', 'John Doe', '12/23', '123', 'US', '123 Main St', '', 'Anytown', 'Anystate', '12345'),
-      ('jane@example.com', ${plans.rows[2].id}, '${new Date(
-			new Date().setMonth(new Date().getMonth() + 1)
-		).toISOString()}', '6543210987654321', 'Jane Smith', '01/24', '321', 'US', '456 Elm St', '', 'Othertown', 'Otherstate', '67890');
+      ('john@example.com', 'Basic', '${new Date(
+				new Date().setMonth(new Date().getMonth() + 1)
+			).toISOString()}', '1234567890123456', 'John Doe', '12/23', '123', 'US', '123 Main St', '', 'Anytown', 'Anystate', '12345'),
+      ('jane@example.com', 'Professional', '${new Date(
+				new Date().setMonth(new Date().getMonth() + 1)
+			).toISOString()}', '6543210987654321', 'Jane Smith', '01/24', '321', 'US', '456 Elm St', '', 'Othertown', 'Otherstate', '67890');
     `);
 
 		console.log("Tables created and sample data inserted successfully.");

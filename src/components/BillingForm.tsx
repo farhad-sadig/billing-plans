@@ -1,5 +1,6 @@
 "use client";
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { usePlan } from "@/context/PlanContext";
 import CardNumberInput from "./CardNumberInput";
 import CardholderNameInput from "./CardholderNameInput";
@@ -8,16 +9,20 @@ import CVVInput from "./CVVInput";
 import AddressDetails from "./AddressDetails";
 import SaveChangesButton from "./SaveChangesButton";
 import EmailInput from "./EmailInput";
-import { useRouter } from "next/navigation";
 
 const BillingForm: React.FC = () => {
 	const { subscription, updatePlan } = usePlan();
+	const router = useRouter();
+	const searchParams = new URLSearchParams(window.location.search);
+	const initialPlan =
+		searchParams.get("plan") || subscription?.plan.name || "Starter";
+
 	const [formState, setFormState] = useState({
 		cardNumber: "",
 		cardholderName: "",
 		expiry: "",
 		cvv: "",
-		email: subscription.email || "",
+		email: subscription?.email || "",
 		address: {
 			country: "",
 			state: "",
@@ -25,10 +30,11 @@ const BillingForm: React.FC = () => {
 			addressLine2: "",
 			city: "",
 			zip: ""
-		}
+		},
+		planType: initialPlan
 	});
 	const [processing, setProcessing] = useState(false);
-	const router = useRouter();
+
 	const isFormValid = Boolean(
 		formState.cardNumber &&
 			formState.cardholderName &&
@@ -60,23 +66,27 @@ const BillingForm: React.FC = () => {
 			if (isFormValid) {
 				try {
 					setProcessing(true);
-					const response = await fetch("/api/save-billing-info", {
+					const response = await fetch("/api/billing", {
 						method: "POST",
 						headers: {
 							"Content-Type": "application/json"
 						},
 						body: JSON.stringify({
 							...formState,
-							planType: subscription.plan.name,
-							planRate: subscription.plan.monthlyRate,
-							planExpiry: subscription.nextBillingDate
+							planType: formState.planType,
+							planRate: subscription?.plan.monthlyRate || 0,
+							planExpiry: subscription?.nextBillingDate || null
 						})
 					});
 
 					if (response.ok) {
 						const data = await response.json();
 						console.log("Response:", data);
-						updatePlan(subscription.plan, formState.email);
+						updatePlan(
+							formState.planType.toLowerCase(),
+							formState.email,
+							"upgrade"
+						);
 						setTimeout(() => {
 							setProcessing(false);
 							router.push("/");
@@ -86,6 +96,8 @@ const BillingForm: React.FC = () => {
 					}
 				} catch (error) {
 					console.error("Error:", error);
+				} finally {
+					setProcessing(false);
 				}
 			}
 		},

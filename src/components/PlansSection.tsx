@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect } from "react";
 import { usePlan, Plan } from "@/context/PlanContext";
 import { BasicPlanIcon, ProfessionalPlanIcon, StarterPlanIcon } from "./Icons";
@@ -6,13 +7,21 @@ import SaveChangesButton from "./SaveChangesButton";
 import Modal from "./Modal";
 import formatDate from "@/utils/formatDate";
 
+export type PlanChangeType =
+	| "upgrade"
+	| "downgrade"
+	| "unsubscribe"
+	| "proratedUpgrade";
+
 const PlansSection: React.FC = () => {
 	const { subscription, updatePlan } = usePlan();
-	const email = subscription.email;
-	const planName = subscription.plan.name;
+	const email = subscription?.email || "";
+	const planName = subscription?.plan.name || "Starter";
 	const [currentPlan, setCurrentPlan] = useState(planName);
 	const [isButtonEnabled, setIsButtonEnabled] = useState(false);
 	const [showModal, setShowModal] = useState(false);
+
+	let planChangeType: PlanChangeType = "upgrade";
 
 	useEffect(() => {
 		setIsButtonEnabled(currentPlan !== planName);
@@ -27,16 +36,29 @@ const PlansSection: React.FC = () => {
 	};
 
 	const handleConfirmChange = () => {
-		const newPlan: Plan = {
-			id: currentPlan.toLowerCase(),
-			name: currentPlan,
-			monthlyRate:
-				currentPlan === "Basic" ? 6 : currentPlan === "Professional" ? 12 : 0
-		};
-		updatePlan(newPlan, email);
+		let planChangeType: PlanChangeType;
+
+		if (currentPlan === planName) {
+			return;
+		}
+
+		switch (currentPlan) {
+			case "Basic":
+				planChangeType = planName === "Starter" ? "upgrade" : "downgrade";
+				break;
+			case "Professional":
+				planChangeType = planName === "Starter" ? "upgrade" : "proratedUpgrade";
+				break;
+			case "Starter":
+				planChangeType = "unsubscribe";
+				break;
+			default:
+				planChangeType = "downgrade";
+		}
+
+		updatePlan(currentPlan.toLowerCase(), email, planChangeType);
 		setShowModal(false);
 	};
-
 	return (
 		<div className="flex flex-col w-full gap-8 py-8 px-4 bg-white tablet:px-8 tablet:py-16 desktop:mx-auto desktop:max-w-7xl">
 			<div className="flex flex-col gap-2">
@@ -57,6 +79,7 @@ const PlansSection: React.FC = () => {
 							currentPlan={currentPlan}
 							onConfirm={handleConfirmChange}
 							email={email}
+							planChangeType={planChangeType}
 						/>
 					)}
 					<div
@@ -156,13 +179,7 @@ const PlansSection: React.FC = () => {
 						<div className="flex justify-between">
 							<span className="font-normal text-neutral-400">Pricing</span>
 							<span className="font-medium text-neutral-900">
-								$
-								{planName === "Professional"
-									? 12
-									: planName === "Basic"
-									? 6
-									: 0}{" "}
-								per month
+								${subscription?.plan.monthlyRate} per month
 							</span>
 						</div>
 						{planName !== "Starter" && (
@@ -173,7 +190,7 @@ const PlansSection: React.FC = () => {
 										Next billing
 									</span>
 									<span className="font-medium text-neutral-900">
-										{formatDate(subscription.nextBillingDate!)}
+										{formatDate(subscription?.nextBillingDate!)}
 									</span>
 								</div>
 							</div>
