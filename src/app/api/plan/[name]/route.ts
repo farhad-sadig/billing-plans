@@ -24,7 +24,12 @@ export async function GET(request: NextRequest) {
 		client.release();
 
 		if (result.rows.length > 0) {
-			return NextResponse.json(result.rows[0]);
+			const plan = {
+				name: result.rows[0].name,
+				monthlyRate: parseFloat(result.rows[0].monthly_rate)
+			};
+			console.log("Fetched plan data:", plan);
+			return NextResponse.json(plan);
 		} else {
 			return NextResponse.json({ error: "Plan not found" }, { status: 404 });
 		}

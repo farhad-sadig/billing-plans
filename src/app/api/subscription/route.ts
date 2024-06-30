@@ -26,10 +26,11 @@ export async function GET(request: NextRequest) {
 				email: result.rows[0].email,
 				plan: {
 					name: result.rows[0].plan_name,
-					monthlyRate: result.rows[0].monthly_rate
+					monthlyRate: parseFloat(result.rows[0].monthly_rate)
 				},
 				nextBillingDate: result.rows[0].next_billing_date
 			};
+			console.log("Fetched subscription data:", subscription);
 			return NextResponse.json(subscription);
 		} else {
 			return NextResponse.json(
@@ -83,7 +84,6 @@ export async function POST(request: NextRequest) {
 			console.log("Billing info saved successfully");
 		}
 
-		// Commit transaction
 		await client.query("COMMIT");
 
 		client.release();

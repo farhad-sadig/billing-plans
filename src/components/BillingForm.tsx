@@ -1,7 +1,7 @@
 "use client";
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { usePlan } from "@/context/PlanContext";
+import { usePlan, Plan } from "@/context/PlanContext";
 import CardNumberInput from "./CardNumberInput";
 import CardholderNameInput from "./CardholderNameInput";
 import ExpiryDateInput from "./ExpiryDateInput";
@@ -9,13 +9,12 @@ import CVVInput from "./CVVInput";
 import AddressDetails from "./AddressDetails";
 import SaveChangesButton from "./SaveChangesButton";
 import EmailInput from "./EmailInput";
+import { determinePlanChangeType } from "@/utils/determinePlanChange";
 
 const BillingForm: React.FC = () => {
 	const { subscription, updatePlan } = usePlan();
 	const router = useRouter();
-	const searchParams = new URLSearchParams(window.location.search);
-	const initialPlan =
-		searchParams.get("plan") || subscription?.plan.name || "Starter";
+	const [initialPlan, setInitialPlan] = useState<Plan["name"]>("Starter");
 
 	const [formState, setFormState] = useState({
 		cardNumber: "",
@@ -31,9 +30,21 @@ const BillingForm: React.FC = () => {
 			city: "",
 			zip: ""
 		},
-		planType: initialPlan
+		planType: initialPlan as Plan["name"]
 	});
 	const [processing, setProcessing] = useState(false);
+
+	useEffect(() => {
+		if (typeof window !== "undefined") {
+			const searchParams = new URLSearchParams(window.location.search);
+			const plan = (searchParams.get("plan") || "Starter") as Plan["name"];
+			setInitialPlan(plan);
+			setFormState((prevState) => ({
+				...prevState,
+				planType: plan
+			}));
+		}
+	}, [subscription]);
 
 	const isFormValid = Boolean(
 		formState.cardNumber &&
@@ -66,6 +77,10 @@ const BillingForm: React.FC = () => {
 			if (isFormValid) {
 				try {
 					setProcessing(true);
+					const planChangeType = determinePlanChangeType(
+						formState.planType,
+						subscription?.plan.name || "Starter"
+					);
 					const response = await fetch("/api/billing", {
 						method: "POST",
 						headers: {
@@ -85,7 +100,7 @@ const BillingForm: React.FC = () => {
 						updatePlan(
 							formState.planType.toLowerCase(),
 							formState.email,
-							"upgrade"
+							planChangeType
 						);
 						setTimeout(() => {
 							setProcessing(false);

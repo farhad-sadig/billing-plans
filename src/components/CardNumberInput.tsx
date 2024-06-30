@@ -12,7 +12,7 @@ const CardNumberInput: React.FC<CardNumberInputProps> = ({
 	setCardNumber
 }) => {
 	const [error, setError] = useState<string | null>(null);
-	const [isTouched, setIsTouched] = useState<boolean>(false);
+	const [, setIsTouched] = useState<boolean>(false);
 	const [isFocused, setIsFocused] = useState<boolean>(false);
 	const inputRef = useRef<HTMLInputElement>(null);
 
@@ -55,6 +55,7 @@ const CardNumberInput: React.FC<CardNumberInputProps> = ({
 				className={styleInputErrorAndFocus(Boolean(error), isFocused)}
 				onFocus={handleFocus}
 				onBlur={handleBlur}
+				onClick={handleFocus}
 			>
 				<svg
 					width="34"

@@ -1,5 +1,4 @@
 "use client";
-import { PlanChangeType } from "@/components/PlansSection";
 import React, {
 	createContext,
 	useState,
@@ -7,6 +6,7 @@ import React, {
 	ReactNode,
 	useEffect
 } from "react";
+import { PlanChangeType } from "@/components/PlansSection";
 
 export interface Plan {
 	name: "Starter" | "Basic" | "Professional";
@@ -36,8 +36,8 @@ export const PlanProvider: React.FC<{ children: ReactNode }> = ({
 	const [subscription, setSubscription] = useState<Subscription | null>(null);
 
 	useEffect(() => {
-		if (subscription?.email) {
-			const fetchSubscription = async () => {
+		const fetchSubscription = async () => {
+			if (subscription?.email) {
 				try {
 					const response = await fetch(
 						`/api/subscription?email=${subscription.email}`
@@ -46,14 +46,15 @@ export const PlanProvider: React.FC<{ children: ReactNode }> = ({
 						throw new Error("Failed to fetch subscription data");
 					}
 					const data = await response.json();
+					console.log("Fetched subscription data:", data); // Debugging log
 					setSubscription(data);
 				} catch (error) {
 					console.error("Failed to fetch subscription data", error);
 				}
-			};
+			}
+		};
 
-			fetchSubscription();
-		}
+		fetchSubscription();
 	}, [subscription?.email]);
 
 	const updatePlan = async (
@@ -67,6 +68,7 @@ export const PlanProvider: React.FC<{ children: ReactNode }> = ({
 				throw new Error("Failed to fetch plan data");
 			}
 			const newPlan: Plan = await planResponse.json();
+			console.log("Fetched plan data:", newPlan); // Debugging log
 
 			const nextBillingDate =
 				planChangeType === "upgrade"
@@ -93,6 +95,7 @@ export const PlanProvider: React.FC<{ children: ReactNode }> = ({
 				throw new Error("Failed to update subscription");
 			}
 
+			console.log("Updated subscription data:", newSubscription); // Debugging log
 			setSubscription(newSubscription);
 		} catch (error) {
 			console.error("Failed to update subscription", error);

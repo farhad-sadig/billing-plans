@@ -1,4 +1,3 @@
-"use client";
 import React, { useState, useEffect } from "react";
 import { usePlan, Plan } from "@/context/PlanContext";
 import { BasicPlanIcon, ProfessionalPlanIcon, StarterPlanIcon } from "./Icons";
@@ -6,6 +5,7 @@ import RadioButton from "./RadioButton";
 import SaveChangesButton from "./SaveChangesButton";
 import Modal from "./Modal";
 import formatDate from "@/utils/formatDate";
+import { determinePlanChangeType } from "@/utils/determinePlanChange";
 
 export type PlanChangeType =
 	| "upgrade"
@@ -20,8 +20,7 @@ const PlansSection: React.FC = () => {
 	const [currentPlan, setCurrentPlan] = useState(planName);
 	const [isButtonEnabled, setIsButtonEnabled] = useState(false);
 	const [showModal, setShowModal] = useState(false);
-
-	let planChangeType: PlanChangeType = "upgrade";
+	const [planChange, setPlanChange] = useState<PlanChangeType>("upgrade");
 
 	useEffect(() => {
 		setIsButtonEnabled(currentPlan !== planName);
@@ -32,33 +31,16 @@ const PlansSection: React.FC = () => {
 	};
 
 	const handleSaveChanges = () => {
+		const planChangeType = determinePlanChangeType(currentPlan, planName);
+		setPlanChange(planChangeType);
 		setShowModal(true);
 	};
 
 	const handleConfirmChange = () => {
-		let planChangeType: PlanChangeType;
-
-		if (currentPlan === planName) {
-			return;
-		}
-
-		switch (currentPlan) {
-			case "Basic":
-				planChangeType = planName === "Starter" ? "upgrade" : "downgrade";
-				break;
-			case "Professional":
-				planChangeType = planName === "Starter" ? "upgrade" : "proratedUpgrade";
-				break;
-			case "Starter":
-				planChangeType = "unsubscribe";
-				break;
-			default:
-				planChangeType = "downgrade";
-		}
-
-		updatePlan(currentPlan.toLowerCase(), email, planChangeType);
+		updatePlan(currentPlan.toLowerCase(), email, planChange);
 		setShowModal(false);
 	};
+
 	return (
 		<div className="flex flex-col w-full gap-8 py-8 px-4 bg-white tablet:px-8 tablet:py-16 desktop:mx-auto desktop:max-w-7xl">
 			<div className="flex flex-col gap-2">
@@ -79,7 +61,7 @@ const PlansSection: React.FC = () => {
 							currentPlan={currentPlan}
 							onConfirm={handleConfirmChange}
 							email={email}
-							planChangeType={planChangeType}
+							planChange={planChange}
 						/>
 					)}
 					<div
@@ -179,7 +161,7 @@ const PlansSection: React.FC = () => {
 						<div className="flex justify-between">
 							<span className="font-normal text-neutral-400">Pricing</span>
 							<span className="font-medium text-neutral-900">
-								${subscription?.plan.monthlyRate} per month
+								${subscription?.plan.monthlyRate.toFixed(2)} per month
 							</span>
 						</div>
 						{planName !== "Starter" && (

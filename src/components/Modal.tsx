@@ -12,7 +12,7 @@ interface ModalProps {
 	currentPlan: Plan["name"];
 	onConfirm: () => void;
 	email: string;
-	planChangeType: PlanChangeType;
+	planChange: PlanChangeType;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -21,7 +21,7 @@ const Modal: React.FC<ModalProps> = ({
 	currentPlan,
 	onConfirm,
 	email,
-	planChangeType: changeType
+	planChange
 }) => {
 	const [billingInfoExists, setBillingInfoExists] = useState(true);
 	const [loading, setLoading] = useState(false);
@@ -30,6 +30,8 @@ const Modal: React.FC<ModalProps> = ({
 
 	const handleConfirm = async () => {
 		setLoading(true);
+		let billingInfoFound = true;
+
 		try {
 			const response = await fetch(`/api/billing?email=${email}`);
 			if (response.ok) {
@@ -38,15 +40,19 @@ const Modal: React.FC<ModalProps> = ({
 					onConfirm();
 					onClose();
 				} else {
-					setBillingInfoExists(false);
+					billingInfoFound = false;
 				}
+			} else if (response.status === 400 || response.status === 404) {
+				billingInfoFound = false;
 			} else {
-				setBillingInfoExists(false);
+				console.error("Error:", response.statusText);
 			}
 		} catch (error) {
 			console.error("Error checking billing info:", error);
+			billingInfoFound = false;
 		} finally {
 			setLoading(false);
+			setBillingInfoExists(billingInfoFound);
 		}
 	};
 
@@ -55,7 +61,7 @@ const Modal: React.FC<ModalProps> = ({
 	let title = "";
 	let description = "";
 
-	switch (changeType) {
+	switch (planChange) {
 		case "upgrade":
 			title = `Upgrade to the ${currentPlan} plan?`;
 			description = `This will take effect immediately. You will be charged ${
