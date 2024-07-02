@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import ErrorMessage from "./ErrorMessage"; // Assuming the ErrorMessage component exists
-import { styleInputErrorAndFocus } from "@/utils/style";
+import { styleInputErrorAndFocus } from "@/utils/utils";
 
 interface CardholderNameInputProps {
 	cardholderName: string;

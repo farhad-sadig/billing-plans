@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import ErrorMessage from "./ErrorMessage";
-import { styleInputErrorAndFocus } from "@/utils/style";
+import { styleInputErrorAndFocus } from "@/utils/utils";
 
 interface CardNumberInputProps {
 	cardNumber: string;

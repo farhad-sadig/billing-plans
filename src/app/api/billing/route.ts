@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
 
 		// Check if plan exists
 		const plan = await client.query(
-			"SELECT name FROM plans WHERE LOWER(name) = LOWER($1) FOR UPDATE",
+			"SELECT name FROM plans WHERE name = $1 FOR UPDATE",
 			[planType]
 		);
 

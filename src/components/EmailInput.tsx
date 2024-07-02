@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { styleInputErrorAndFocus } from "@/utils/style";
-import ErrorMessage from "./ErrorMessage"; // Assuming the ErrorMessage component exists
+import ErrorMessage from "./ErrorMessage";
 
 interface EmailInputProps {
 	email: string;

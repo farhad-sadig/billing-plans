@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ErrorMessage from "./ErrorMessage";
-import { styleInputErrorAndFocus } from "@/utils/style";
+import { styleInputErrorAndFocus } from "@/utils/utils";
 
 const countries = [
 	{ code: "US", name: "United States" },

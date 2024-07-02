@@ -3,30 +3,29 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plan, usePlan } from "@/context/PlanContext";
 import CloseButton from "./CloseButton";
-import { PlanChangeType } from "./PlansSection";
-import formatDate from "@/utils/formatDate";
+import { formatDate } from "@/utils/utils";
 
 interface ModalProps {
 	show: boolean;
 	onClose: () => void;
-	currentPlan: Plan["name"];
+	newPlanName: Plan["name"];
 	onConfirm: () => void;
 	email: string;
-	planChange: PlanChangeType;
 }
 
 const Modal: React.FC<ModalProps> = ({
 	show,
 	onClose,
-	currentPlan,
+	newPlanName,
 	onConfirm,
-	email,
-	planChange
+	email
 }) => {
 	const [billingInfoExists, setBillingInfoExists] = useState(true);
 	const [loading, setLoading] = useState(false);
 	const { subscription } = usePlan();
 	const router = useRouter();
+
+	const currentPlanName = subscription?.plan.name;
 
 	const handleConfirm = async () => {
 		setLoading(true);
@@ -61,30 +60,33 @@ const Modal: React.FC<ModalProps> = ({
 	let title = "";
 	let description = "";
 
-	switch (planChange) {
-		case "upgrade":
-			title = `Upgrade to the ${currentPlan} plan?`;
-			description = `This will take effect immediately. You will be charged ${
-				currentPlan === "Basic" ? "$6" : "$12"
-			} / month.`;
-			break;
-		case "proratedUpgrade":
-			title = `Upgrade your plan to the Professional Plan?`;
-			description = `This will take immediate effect. You will be charged a prorated $3 now (for 14 remaining days) and $12 / month starting from the next billing cycle.`;
-			break;
-		case "downgrade":
-			title = `Are you sure you want to downgrade your plan?`;
-			description = `Your plan privileges will be downgraded on ${formatDate(
-				subscription!.nextBillingDate!
-			)}, at the end of your current billing cycle.`;
-			break;
-		case "unsubscribe":
+	switch (newPlanName) {
+		case "Starter":
 			title = `Are you sure you want to unsubscribe?`;
 			description = `You will be downgraded to the Starter plan. This will take effect at the end of your current billing cycle.`;
 			break;
+		case "Professional":
+			if (currentPlanName === "Basic") {
+				title = `Upgrade your plan to the Professional Plan?`;
+				description = `This will take immediate effect. You will be charged a prorated amount now and $12 / month starting from the next billing cycle.`;
+			} else {
+				title = `Upgrade to the Professional plan?`;
+				description = `This will take effect immediately. You will be charged $12 / month.`;
+			}
+			break;
+		case "Basic":
+			if (currentPlanName === "Professional") {
+				title = `Are you sure you want to downgrade to the Basic plan?`;
+				description = `Your plan privileges will be downgraded on ${formatDate(
+					subscription!.nextBillingDate!
+				)}, at the end of your current billing cycle.`;
+			} else {
+				title = `Upgrade to the Basic plan?`;
+				description = `This will take effect immediately. You will be charged $6 / month.`;
+			}
+			break;
 		default:
-			title = "";
-			description = "";
+			break;
 	}
 
 	return (
@@ -137,7 +139,7 @@ const Modal: React.FC<ModalProps> = ({
 								className="bg-indigo-700 w-full px-4 py-2.5 text-white rounded hover:bg-indigo-800 focus:bg-indigo-800"
 								onClick={() => {
 									onClose();
-									router.push(`/billing?plan=${currentPlan}`);
+									router.push(`/billing?plan=${newPlanName}`);
 								}}
 							>
 								Add billing information

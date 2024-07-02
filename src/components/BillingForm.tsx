@@ -9,7 +9,6 @@ import CVVInput from "./CVVInput";
 import AddressDetails from "./AddressDetails";
 import SaveChangesButton from "./SaveChangesButton";
 import EmailInput from "./EmailInput";
-import { determinePlanChangeType } from "@/utils/determinePlanChange";
 
 const BillingForm: React.FC = () => {
 	const { subscription, updatePlan } = usePlan();
@@ -77,10 +76,6 @@ const BillingForm: React.FC = () => {
 			if (isFormValid) {
 				try {
 					setProcessing(true);
-					const planChangeType = determinePlanChangeType(
-						formState.planType,
-						subscription?.plan.name || "Starter"
-					);
 					const response = await fetch("/api/billing", {
 						method: "POST",
 						headers: {
@@ -97,11 +92,7 @@ const BillingForm: React.FC = () => {
 					if (response.ok) {
 						const data = await response.json();
 						console.log("Response:", data);
-						updatePlan(
-							formState.planType.toLowerCase(),
-							formState.email,
-							planChangeType
-						);
+						updatePlan(formState.planType, formState.email);
 						setTimeout(() => {
 							setProcessing(false);
 							router.push("/");
