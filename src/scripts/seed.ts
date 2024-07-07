@@ -6,20 +6,12 @@ async function main() {
 
 	try {
 		await client.query(`DROP TABLE IF EXISTS billing_info`);
-		await client.query(`DROP TABLE IF EXISTS plans`);
-
-		await client.query(`
-      CREATE TABLE IF NOT EXISTS plans (
-        name VARCHAR(50) PRIMARY KEY CHECK (name IN ('Starter', 'Basic', 'Professional')),
-        monthly_rate DECIMAL(10, 2) NOT NULL
-      );
-    `);
 
 		await client.query(`
       CREATE TABLE IF NOT EXISTS billing_info (
         id SERIAL PRIMARY KEY,
         email VARCHAR(255) UNIQUE NOT NULL,
-        plan_name VARCHAR(50) NOT NULL,
+        plan_name VARCHAR(50) NOT NULL CHECK (plan_name IN ('Starter', 'Basic', 'Professional')),
         next_billing_date TIMESTAMP DEFAULT NULL,
         plan_expiry TIMESTAMP DEFAULT NULL,
         card_number VARCHAR(16) NOT NULL,
@@ -33,19 +25,9 @@ async function main() {
         state VARCHAR(255) NOT NULL,
         zip VARCHAR(10) NOT NULL,
         change_pending BOOLEAN DEFAULT FALSE,
-        pending_plan_name VARCHAR(50) DEFAULT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (plan_name) REFERENCES plans(name),
-        FOREIGN KEY (pending_plan_name) REFERENCES plans(name)
+        pending_plan_name VARCHAR(50) DEFAULT NULL CHECK (pending_plan_name IN ('Starter', 'Basic', 'Professional')),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
-    `);
-
-		// Insert sample plans
-		await client.query(`
-      INSERT INTO plans (name, monthly_rate) VALUES 
-      ('Starter', 0.00),
-      ('Basic', 6.00),
-      ('Professional', 12.00);
     `);
 
 		// Insert sample billing info

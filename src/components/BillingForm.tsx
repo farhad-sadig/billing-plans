@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { usePlan, Plan } from "@/context/PlanContext";
+import { usePlan } from "@/context/PlanContext";
+import { Plan } from "@/constants/plans";
 import CardNumberInput from "./CardNumberInput";
 import CardholderNameInput from "./CardholderNameInput";
 import ExpiryDateInput from "./ExpiryDateInput";

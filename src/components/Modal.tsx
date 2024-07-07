@@ -1,7 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plan, usePlan } from "@/context/PlanContext";
+import { usePlan } from "@/context/PlanContext";
+import { PLANS, Plan } from "@/constants/plans";
 import CloseButton from "./CloseButton";
 import { formatDate, getProratedChargeDescription } from "@/utils/utils";
 
@@ -68,7 +69,10 @@ const Modal: React.FC<ModalProps> = ({
 		case "Professional":
 			if (currentPlanName === "Basic") {
 				title = `Upgrade your plan to the Professional Plan?`;
-				description = getProratedChargeDescription(12, 6);
+				description = getProratedChargeDescription(
+					PLANS["Professional"].monthlyRate,
+					PLANS["Basic"].monthlyRate
+				);
 			} else {
 				title = `Upgrade to the Professional plan?`;
 				description = `This will take effect immediately. You will be charged $12 / month.`;

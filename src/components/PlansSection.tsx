@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { usePlan, Plan } from "@/context/PlanContext";
+import { usePlan } from "@/context/PlanContext";
+import { PLANS, Plan } from "@/constants/plans";
 import { BasicPlanIcon, ProfessionalPlanIcon, StarterPlanIcon } from "./Icons";
 import RadioButton from "./RadioButton";
 import SaveChangesButton from "./SaveChangesButton";
@@ -62,6 +63,35 @@ const PlansSection: React.FC = () => {
 		return null;
 	};
 
+	const renderPlanOption = (
+		planName: Plan["name"],
+		planIcon: React.ReactNode,
+		description: string
+	) => (
+		<div
+			className={`flex items-start p-5 gap-5 rounded-lg border border-solid hover:bg-neutral-50 tablet:items-center ${
+				newPlanName === planName ? "border-indigo-600" : "border-neutral-200"
+			}`}
+		>
+			<div className="flex flex-col items-start tablet:flex-row gap-5 tablet:items-center">
+				{planIcon}
+				<div className="flex flex-col gap-2">
+					<div className="font-semibold text-lg text-neutral-900">
+						{planName} • ${PLANS[planName].monthlyRate}/month
+					</div>
+					<div className="font-normal text-sm text-neutral-600">
+						{description}
+					</div>
+				</div>
+			</div>
+			<RadioButton
+				value={planName}
+				checked={newPlanName === planName}
+				handlePlanChange={handlePlanChange}
+			/>
+		</div>
+	);
+
 	return (
 		<div className="flex flex-col w-full gap-8 py-8 px-4 bg-white tablet:px-8 tablet:py-16 desktop:mx-auto desktop:max-w-7xl">
 			<div className="flex flex-col gap-2">
@@ -85,81 +115,21 @@ const PlansSection: React.FC = () => {
 							email={email}
 						/>
 					)}
-					<div
-						className={`flex items-start p-5 gap-5 rounded-lg border border-solid hover:bg-neutral-50 tablet:items-center ${
-							newPlanName === "Starter"
-								? "border-indigo-600"
-								: "border-neutral-200"
-						}`}
-					>
-						<div className="flex flex-col items-start tablet:flex-row gap-5 tablet:items-center">
-							<StarterPlanIcon />
-							<div className="flex flex-col gap-2">
-								<div className="font-semibold text-lg text-neutral-900">
-									Starter • $0/month
-								</div>
-								<div className="font-normal text-sm text-neutral-600">
-									Includes up to 10 users, 20GB individual data, and access to
-									all features.
-								</div>
-							</div>
-						</div>
-						<RadioButton
-							value="Starter"
-							checked={newPlanName === "Starter"}
-							handlePlanChange={handlePlanChange}
-						/>
-					</div>
-					<div
-						className={`flex items-start p-5 gap-5 rounded-lg border border-solid hover:bg-neutral-50 tablet:items-center ${
-							newPlanName === "Basic"
-								? "border-indigo-600"
-								: "border-neutral-200"
-						}`}
-					>
-						<div className="flex flex-col items-start tablet:flex-row gap-5 tablet:items-center">
-							<BasicPlanIcon />
-							<div className="flex flex-col gap-2">
-								<div className="font-semibold text-lg text-neutral-900">
-									Basic • $6/month
-								</div>
-								<div className="font-normal text-sm text-neutral-600">
-									Includes up to 20 users, 40GB individual data, and access to
-									all features.
-								</div>
-							</div>
-						</div>
-						<RadioButton
-							value="Basic"
-							checked={newPlanName === "Basic"}
-							handlePlanChange={handlePlanChange}
-						/>
-					</div>
-					<div
-						className={`flex items-start p-5 gap-5 rounded-lg border border-solid hover:bg-neutral-50 tablet:items-center ${
-							newPlanName === "Professional"
-								? "border-indigo-600"
-								: "border-neutral-200"
-						}`}
-					>
-						<div className="flex flex-col items-start tablet:flex-row gap-5 tablet:items-center">
-							<ProfessionalPlanIcon />
-							<div className="flex flex-col gap-2">
-								<div className="font-semibold text-lg text-neutral-900">
-									Professional • $12/month
-								</div>
-								<div className="font-normal text-sm text-neutral-600">
-									Includes up to 50 users, 100GB individual data, and access to
-									all features.
-								</div>
-							</div>
-						</div>
-						<RadioButton
-							value="Professional"
-							checked={newPlanName === "Professional"}
-							handlePlanChange={handlePlanChange}
-						/>
-					</div>
+					{renderPlanOption(
+						"Starter",
+						<StarterPlanIcon />,
+						"Includes up to 10 users, 20GB individual data, and access to all features."
+					)}
+					{renderPlanOption(
+						"Basic",
+						<BasicPlanIcon />,
+						"Includes up to 20 users, 40GB individual data, and access to all features."
+					)}
+					{renderPlanOption(
+						"Professional",
+						<ProfessionalPlanIcon />,
+						"Includes up to 50 users, 100GB individual data, and access to all features."
+					)}
 					<div className="flex justify-end items-center gap-4 py-4">
 						<SaveChangesButton
 							isEnabled={isButtonEnabled}

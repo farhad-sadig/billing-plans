@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { PLANS } from "@/constants/plans";
 import { db } from "@vercel/postgres";
 
 export async function GET(request: NextRequest) {
@@ -12,9 +13,8 @@ export async function GET(request: NextRequest) {
 		const client = await db.connect();
 
 		const result = await client.query(
-			`SELECT b.email, b.plan_name, b.next_billing_date, b.change_pending, b.pending_plan_name, p.monthly_rate
+			`SELECT b.email, b.plan_name, b.next_billing_date, b.change_pending, b.pending_plan_name
        FROM billing_info b
-       LEFT JOIN plans p ON b.plan_name = p.name
        WHERE b.email = $1`,
 			[email]
 		);
@@ -22,12 +22,10 @@ export async function GET(request: NextRequest) {
 		client.release();
 
 		if (result.rows.length > 0) {
+			const plan = PLANS[result.rows[0].plan_name];
 			const subscription = {
 				email: result.rows[0].email,
-				plan: {
-					name: result.rows[0].plan_name,
-					monthlyRate: parseFloat(result.rows[0].monthly_rate)
-				},
+				plan: plan,
 				nextBillingDate: result.rows[0].next_billing_date,
 				changePending: result.rows[0].change_pending,
 				pendingPlanName: result.rows[0].pending_plan_name
@@ -56,7 +54,6 @@ export async function POST(request: NextRequest) {
 
 		const client = await db.connect();
 
-		// Start transaction
 		await client.query("BEGIN");
 
 		const existingBillingInfo = await client.query(

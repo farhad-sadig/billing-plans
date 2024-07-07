@@ -6,11 +6,7 @@ import React, {
 	ReactNode,
 	useEffect
 } from "react";
-
-export interface Plan {
-	name: "Starter" | "Basic" | "Professional";
-	monthlyRate: number;
-}
+import { PLANS, Plan } from "@/constants/plans";
 
 interface Subscription {
 	plan: Plan;
@@ -58,11 +54,7 @@ export const PlanProvider: React.FC<{ children: ReactNode }> = ({
 
 	const updatePlan = async (newPlanName: Plan["name"], email: string) => {
 		try {
-			const planResponse = await fetch(`/api/plan/${newPlanName}`);
-			if (!planResponse.ok) {
-				throw new Error("Failed to fetch plan data");
-			}
-			const newPlan: Plan = await planResponse.json();
+			const newPlan: Plan = PLANS[newPlanName];
 			console.log("Fetched plan data:", newPlan);
 			const nextBillingDate = subscription?.nextBillingDate
 				? subscription.nextBillingDate
