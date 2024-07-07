@@ -33,3 +33,17 @@ export function formatDate(dateString: string): string {
 
 	return formattedDate;
 }
+
+export const getProratedChargeDescription = (
+	newRate: number,
+	oldRate: number
+): string => {
+	const now = new Date();
+	const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+	const remainingDays = endOfMonth.getDate() - now.getDate() + 1;
+	const totalDaysInMonth = endOfMonth.getDate();
+	const proratedCharge = Math.round(
+		((newRate - oldRate) / totalDaysInMonth) * remainingDays
+	);
+	return `This will take immediate effect. You will be charged a prorated $${proratedCharge} now (for ${remainingDays} remaining days) and $${newRate} / month starting from the next billing cycle.`;
+};

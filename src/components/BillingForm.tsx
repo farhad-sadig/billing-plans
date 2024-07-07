@@ -85,7 +85,9 @@ const BillingForm: React.FC = () => {
 							...formState,
 							planType: formState.planType,
 							planRate: subscription?.plan.monthlyRate || 0,
-							planExpiry: subscription?.nextBillingDate || null
+							planExpiry: subscription?.nextBillingDate || null,
+							changePending: false,
+							pendingPlanName: null
 						})
 					});
 

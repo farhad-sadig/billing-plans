@@ -32,8 +32,11 @@ async function main() {
         city VARCHAR(255) NOT NULL,
         state VARCHAR(255) NOT NULL,
         zip VARCHAR(10) NOT NULL,
+        change_pending BOOLEAN DEFAULT FALSE,
+        pending_plan_name VARCHAR(50) DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (plan_name) REFERENCES plans(name)
+        FOREIGN KEY (plan_name) REFERENCES plans(name),
+        FOREIGN KEY (pending_plan_name) REFERENCES plans(name)
       );
     `);
 

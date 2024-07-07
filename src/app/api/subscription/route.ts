@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
 		const client = await db.connect();
 
 		const result = await client.query(
-			`SELECT b.email, b.plan_name, b.next_billing_date, p.monthly_rate
+			`SELECT b.email, b.plan_name, b.next_billing_date, b.change_pending, b.pending_plan_name, p.monthly_rate
        FROM billing_info b
        LEFT JOIN plans p ON b.plan_name = p.name
        WHERE b.email = $1`,
@@ -28,7 +28,9 @@ export async function GET(request: NextRequest) {
 					name: result.rows[0].plan_name,
 					monthlyRate: parseFloat(result.rows[0].monthly_rate)
 				},
-				nextBillingDate: result.rows[0].next_billing_date
+				nextBillingDate: result.rows[0].next_billing_date,
+				changePending: result.rows[0].change_pending,
+				pendingPlanName: result.rows[0].pending_plan_name
 			};
 			console.log("Fetched subscription data:", subscription);
 			return NextResponse.json(subscription);
@@ -49,7 +51,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
 	try {
-		const { plan, nextBillingDate, email } = await request.json();
+		const { plan, nextBillingDate, email, changePending, pendingPlanName } =
+			await request.json();
 
 		const client = await db.connect();
 
@@ -66,20 +69,20 @@ export async function POST(request: NextRequest) {
 			await client.query(
 				`
           UPDATE billing_info
-          SET plan_name = $1, next_billing_date = $2
-          WHERE email = $3
+          SET plan_name = $1, next_billing_date = $2, change_pending = $3, pending_plan_name = $4
+          WHERE email = $5
           `,
-				[plan.name, nextBillingDate, email]
+				[plan.name, nextBillingDate, changePending, pendingPlanName, email]
 			);
 			console.log("Billing info updated successfully");
 		} else {
 			console.log("Inserting new billing info...");
 			await client.query(
 				`
-          INSERT INTO billing_info (email, plan_name, next_billing_date)
-          VALUES ($1, $2, $3)
+          INSERT INTO billing_info (email, plan_name, next_billing_date, change_pending, pending_plan_name)
+          VALUES ($1, $2, $3, $4, $5)
           `,
-				[email, plan.name, nextBillingDate]
+				[email, plan.name, nextBillingDate, changePending, pendingPlanName]
 			);
 			console.log("Billing info saved successfully");
 		}

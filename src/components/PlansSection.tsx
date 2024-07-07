@@ -4,20 +4,22 @@ import { BasicPlanIcon, ProfessionalPlanIcon, StarterPlanIcon } from "./Icons";
 import RadioButton from "./RadioButton";
 import SaveChangesButton from "./SaveChangesButton";
 import Modal from "./Modal";
-
 import { formatDate } from "@/utils/utils";
 
 const PlansSection: React.FC = () => {
-	const { subscription, updatePlan } = usePlan();
+	const { subscription, updatePlan, cancelPendingChange } = usePlan();
 	const email = subscription?.email || "";
-	const planName = subscription?.plan.name || "Starter";
-	const [newPlanName, setNewPlanName] = useState(planName);
+	const actualPlanName = subscription?.plan.name || "Starter";
+	const currentPlanName = subscription?.changePending
+		? subscription.prevPlanName
+		: actualPlanName;
+	const [newPlanName, setNewPlanName] = useState(actualPlanName);
 	const [isButtonEnabled, setIsButtonEnabled] = useState(false);
 	const [showModal, setShowModal] = useState(false);
 
 	useEffect(() => {
-		setIsButtonEnabled(newPlanName !== planName);
-	}, [newPlanName, planName]);
+		setIsButtonEnabled(newPlanName !== actualPlanName);
+	}, [newPlanName, actualPlanName]);
 
 	const handlePlanChange = (planType: Plan["name"]) => {
 		setNewPlanName(planType);
@@ -32,6 +34,34 @@ const PlansSection: React.FC = () => {
 		setShowModal(false);
 	};
 
+	const handleCancelPendingChange = () => {
+		cancelPendingChange();
+	};
+
+	const renderPendingChangeBanner = () => {
+		if (subscription?.changePending && subscription.pendingPlanName) {
+			const pendingPlanName = subscription.pendingPlanName;
+			const isDowngrade = pendingPlanName === "Basic";
+
+			return (
+				<div className="bg-yellow-100 p-4 rounded-lg">
+					<p className="text-yellow-800">
+						{isDowngrade
+							? `You will be downgraded to the ${pendingPlanName} plan at the end of your current billing period.`
+							: "Your membership will be cancelled at the end of your billing period."}
+					</p>
+					<button
+						className="text-blue-500 underline"
+						onClick={handleCancelPendingChange}
+					>
+						Cancel {isDowngrade ? "Downgrade" : "Unsubscribe"}
+					</button>
+				</div>
+			);
+		}
+		return null;
+	};
+
 	return (
 		<div className="flex flex-col w-full gap-8 py-8 px-4 bg-white tablet:px-8 tablet:py-16 desktop:mx-auto desktop:max-w-7xl">
 			<div className="flex flex-col gap-2">
@@ -43,11 +73,7 @@ const PlansSection: React.FC = () => {
 					ventures to groups of up to 50.
 				</p>
 			</div>
-			{planName === "Starter" && subscription?.nextBillingDate && (
-				<>Cancel Unsubscribe</>
-			)}
-			{planName === "Basic" &&
-				subscription?.prevPlanName === "Professional" && <>Cancel Downgrade</>}
+			{renderPendingChangeBanner()}
 			<div className="flex flex-col desktop:flex-row desktop:items-start desktop:gap-8">
 				<div className="flex flex-col gap-4 w-full">
 					{showModal && (
@@ -149,7 +175,7 @@ const PlansSection: React.FC = () => {
 						<div className="flex justify-between">
 							<span className="font-normal text-neutral-400">Plan type</span>
 							<span className="font-medium text-neutral-900">
-								{planName} plan
+								{currentPlanName} plan
 							</span>
 						</div>
 						<hr className="h-px bg-neutral-200"></hr>
@@ -159,7 +185,7 @@ const PlansSection: React.FC = () => {
 								${subscription?.plan.monthlyRate} per month
 							</span>
 						</div>
-						{planName !== "Starter" && (
+						{currentPlanName !== "Starter" && (
 							<div className="flex flex-col gap-3">
 								<hr className="h-px bg-neutral-200"></hr>
 								<div className="flex justify-between">

@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
 		const client = await db.connect();
 
 		const result = await client.query(
-			`SELECT b.email, b.cardholder_name, p.name AS plan_name, p.monthly_rate, b.next_billing_date
+			`SELECT b.email, b.cardholder_name, p.name AS plan_name, p.monthly_rate, b.next_billing_date, b.change_pending, b.pending_plan_name
 			 FROM billing_info b
 			 LEFT JOIN plans p ON b.plan_name = p.name
 			 WHERE b.email = $1`,
@@ -79,90 +79,104 @@ export async function POST(request: NextRequest) {
 
 		const client = await db.connect();
 
-		// Start transaction
-		await client.query("BEGIN");
+		try {
+			// Start transaction
+			await client.query("BEGIN");
 
-		// Check if plan exists
-		const plan = await client.query(
-			"SELECT name FROM plans WHERE name = $1 FOR UPDATE",
-			[planType]
-		);
+			// Check if plan exists
+			const plan = await client.query(
+				"SELECT name FROM plans WHERE name = $1 FOR UPDATE",
+				[planType]
+			);
 
-		if (plan.rows.length === 0) {
+			if (plan.rows.length === 0) {
+				await client.query("ROLLBACK");
+				return NextResponse.json(
+					{ error: "Invalid plan type" },
+					{ status: 400 }
+				);
+			}
+
+			const nextBillingDate =
+				planType !== "Starter"
+					? new Date(
+							new Date().setMonth(new Date().getMonth() + 1)
+					  ).toISOString()
+					: null;
+
+			// Check if billing info exists and lock the row
+			const existingBillingInfo = await client.query(
+				"SELECT id FROM billing_info WHERE email = $1 FOR UPDATE",
+				[email]
+			);
+
+			if (existingBillingInfo.rows.length > 0) {
+				console.log("Updating existing billing info...");
+				await client.query(
+					`
+						UPDATE billing_info
+						SET plan_name = $1, next_billing_date = $2, card_number = $3, cardholder_name = $4, expiry = $5, cvv = $6, country = $7, address_line1 = $8, address_line2 = $9, city = $10, state = $11, zip = $12, change_pending = $13, pending_plan_name = $14
+						WHERE email = $15
+						`,
+					[
+						planType,
+						nextBillingDate,
+						cardNumber,
+						cardholderName,
+						expiry,
+						cvv,
+						country,
+						addressLine1,
+						addressLine2,
+						city,
+						state,
+						zip,
+						false,
+						null,
+						email
+					]
+				);
+				console.log("Billing info updated successfully");
+			} else {
+				console.log("Inserting new billing info...");
+				await client.query(
+					`
+						INSERT INTO billing_info (email, plan_name, next_billing_date, card_number, cardholder_name, expiry, cvv, country, address_line1, address_line2, city, state, zip, change_pending, pending_plan_name)
+						VALUES ($1, $2, $3, $4, $5, $6, $7, $8, COALESCE(NULLIF($9, ''), NULL), $10, $11, $12, $13, $14, $15)
+						`,
+					[
+						email,
+						planType,
+						nextBillingDate,
+						cardNumber,
+						cardholderName,
+						expiry,
+						cvv,
+						country,
+						addressLine1,
+						addressLine2,
+						city,
+						state,
+						zip,
+						false,
+						null
+					]
+				);
+				console.log("Billing info saved successfully");
+			}
+
+			// Commit transaction
+			await client.query("COMMIT");
+
+			return NextResponse.json({
+				message: "Billing info saved successfully"
+			});
+		} catch (error) {
 			await client.query("ROLLBACK");
-			return NextResponse.json({ error: "Invalid plan type" }, { status: 400 });
+			throw error;
+		} finally {
+			client.release();
 		}
-
-		const nextBillingDate =
-			planType !== "Starter"
-				? new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString()
-				: null;
-
-		// Check if billing info exists and lock the row
-		const existingBillingInfo = await client.query(
-			"SELECT id FROM billing_info WHERE email = $1 FOR UPDATE",
-			[email]
-		);
-
-		if (existingBillingInfo.rows.length > 0) {
-			console.log("Updating existing billing info...");
-			await client.query(
-				`
-                    UPDATE billing_info
-                    SET plan_name = $1, next_billing_date = $2, card_number = $3, cardholder_name = $4, expiry = $5, cvv = $6, country = $7, address_line1 = $8, address_line2 = $9, city = $10, state = $11, zip = $12
-                    WHERE email = $13
-                    `,
-				[
-					planType,
-					nextBillingDate,
-					cardNumber,
-					cardholderName,
-					expiry,
-					cvv,
-					country,
-					addressLine1,
-					addressLine2,
-					city,
-					state,
-					zip,
-					email
-				]
-			);
-			console.log("Billing info updated successfully");
-		} else {
-			console.log("Inserting new billing info...");
-			await client.query(
-				`
-                    INSERT INTO billing_info (email, plan_name, next_billing_date, card_number, cardholder_name, expiry, cvv, country, address_line1, address_line2, city, state, zip)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, COALESCE(NULLIF($9, ''), NULL), $10, $11, $12, $13)
-                    `,
-				[
-					email,
-					planType,
-					nextBillingDate,
-					cardNumber,
-					cardholderName,
-					expiry,
-					cvv,
-					country,
-					addressLine1,
-					addressLine2,
-					city,
-					state,
-					zip
-				]
-			);
-			console.log("Billing info saved successfully");
-		}
-
-		// Commit transaction
-		await client.query("COMMIT");
-
-		client.release();
-
-		return NextResponse.json({
-			message: "Billing info saved successfully"
-		});
 	} catch (error) {
 		if (error instanceof Error) {
 			console.error("Error saving billing info:", error.message);
