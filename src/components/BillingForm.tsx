@@ -10,6 +10,7 @@ import CVVInput from "./CVVInput";
 import AddressDetails from "./AddressDetails";
 import SaveChangesButton from "./SaveChangesButton";
 import EmailInput from "./EmailInput";
+import ProcessingModal from "./ProcessingModal";
 
 const BillingForm: React.FC = () => {
 	const { subscription, updatePlan } = usePlan();
@@ -97,15 +98,15 @@ const BillingForm: React.FC = () => {
 						console.log("Response:", data);
 						updatePlan(formState.planType, formState.email);
 						setTimeout(() => {
-							setProcessing(false);
 							router.push("/");
+							setProcessing(false);
 						}, 2000);
 					} else {
 						console.error("Error:", response.statusText);
+						setProcessing(false);
 					}
 				} catch (error) {
 					console.error("Error:", error);
-				} finally {
 					setProcessing(false);
 				}
 			}
@@ -121,71 +122,75 @@ const BillingForm: React.FC = () => {
 
 	return (
 		<div className="flex flex-col gap-4 bg-white py-16 px-4">
-			{processing && (
-				<div className="fixed inset-0 flex items-center justify-center bg-neutral-950 bg-opacity-75 z-10">
-					Show Processing Modal
-				</div>
+			{processing && <ProcessingModal />}
+
+			{!processing && (
+				<>
+					<div className="flex flex-col gap-2 mt-4">
+						<span className="font-semibold text-xl text-neutral-900">
+							Billing Information
+						</span>
+						<span className="font-normal text-sm text-neutral-500">
+							Update your billing details and address
+						</span>
+					</div>
+					<form
+						ref={formRef}
+						onSubmit={handleSubmit}
+						className="flex flex-col gap-6"
+					>
+						<span className="font-medium text-base text-neutral-900">
+							Payment Details
+						</span>
+						<CardNumberInput
+							cardNumber={formState.cardNumber}
+							setCardNumber={(value) =>
+								setFormState({ ...formState, cardNumber: value })
+							}
+						/>
+						<CardholderNameInput
+							cardholderName={formState.cardholderName}
+							setCardholderName={(value) =>
+								setFormState({ ...formState, cardholderName: value })
+							}
+						/>
+						<div className="flex justify-between">
+							<ExpiryDateInput
+								expiryDate={formState.expiry}
+								setExpiryDate={(value) =>
+									setFormState({ ...formState, expiry: value })
+								}
+							/>
+							<CVVInput
+								cvv={formState.cvv}
+								setCvv={(value) => setFormState({ ...formState, cvv: value })}
+							/>
+						</div>
+						<hr className="h-px bg-neutral-200" />
+						<span className="font-medium text-base text-neutral-900">
+							Email Address
+						</span>
+						<EmailInput
+							email={formState.email}
+							setEmail={(value) => setFormState({ ...formState, email: value })}
+						/>
+						<hr className="h-px bg-neutral-200" />
+						<span className="font-medium text-base text-neutral-900">
+							Address details
+						</span>
+						<AddressDetails
+							address={formState.address}
+							setAddress={handleAddressChange}
+						/>
+						<div className="flex justify-end items-center gap-4 py-4">
+							<SaveChangesButton
+								isEnabled={isFormValid}
+								onClick={handleClick}
+							/>
+						</div>
+					</form>
+				</>
 			)}
-			<div className="flex flex-col gap-2 mt-4">
-				<span className="font-semibold text-xl text-neutral-900">
-					Billing Information
-				</span>
-				<span className="font-normal text-sm text-neutral-500">
-					Update your billing details and address
-				</span>
-			</div>
-			<form
-				ref={formRef}
-				onSubmit={handleSubmit}
-				className="flex flex-col gap-6"
-			>
-				<span className="font-medium text-base text-neutral-900">
-					Payment Details
-				</span>
-				<CardNumberInput
-					cardNumber={formState.cardNumber}
-					setCardNumber={(value) =>
-						setFormState({ ...formState, cardNumber: value })
-					}
-				/>
-				<CardholderNameInput
-					cardholderName={formState.cardholderName}
-					setCardholderName={(value) =>
-						setFormState({ ...formState, cardholderName: value })
-					}
-				/>
-				<div className="flex justify-between">
-					<ExpiryDateInput
-						expiryDate={formState.expiry}
-						setExpiryDate={(value) =>
-							setFormState({ ...formState, expiry: value })
-						}
-					/>
-					<CVVInput
-						cvv={formState.cvv}
-						setCvv={(value) => setFormState({ ...formState, cvv: value })}
-					/>
-				</div>
-				<hr className="h-px bg-neutral-200" />
-				<span className="font-medium text-base text-neutral-900">
-					Email Address
-				</span>
-				<EmailInput
-					email={formState.email}
-					setEmail={(value) => setFormState({ ...formState, email: value })}
-				/>
-				<hr className="h-px bg-neutral-200" />
-				<span className="font-medium text-base text-neutral-900">
-					Address details
-				</span>
-				<AddressDetails
-					address={formState.address}
-					setAddress={handleAddressChange}
-				/>
-				<div className="flex justify-end items-center gap-4 py-4">
-					<SaveChangesButton isEnabled={isFormValid} onClick={handleClick} />
-				</div>
-			</form>
 		</div>
 	);
 };

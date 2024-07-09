@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import ErrorMessage from "./ErrorMessage"; // Assuming the ErrorMessage component exists
+import ErrorMessage from "./ErrorMessage";
 import { styleInputErrorAndFocus } from "@/utils/utils";
 
 interface ExpiryDateInputProps {
@@ -18,11 +18,10 @@ const ExpiryDateInput: React.FC<ExpiryDateInputProps> = ({
 	const handleExpiryDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const value = e.target.value;
 
-		// Format the input to MM/YY and handle deletion
 		const formattedValue = value
-			.replace(/\D/g, "") // Remove all non-digit characters
-			.replace(/^(\d{2})(\d)/, "$1/$2") // Add a slash after the first 2 digits
-			.slice(0, 5); // Limit input to 5 characters
+			.replace(/\D/g, "")
+			.replace(/^(\d{2})(\d)/, "$1/$2")
+			.slice(0, 5);
 
 		setExpiryDate(formattedValue);
 	};
@@ -42,13 +41,12 @@ const ExpiryDateInput: React.FC<ExpiryDateInputProps> = ({
 	};
 
 	const isValidExpiryDate = (date: string) => {
-		// Basic validation for MM/YY format
 		if (!/^\d{2}\/\d{2}$/.test(date)) return false;
 
 		const [month, year] = date.split("/").map(Number);
 		if (month < 1 || month > 12) return false;
 
-		const currentYear = new Date().getFullYear() % 100; // Get last 2 digits of current year
+		const currentYear = new Date().getFullYear() % 100;
 		return year >= currentYear;
 	};
 

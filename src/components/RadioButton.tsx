@@ -1,5 +1,5 @@
 import React from "react";
-import { Plan } from "@/context/PlanContext";
+import { Plan } from "@/constants/plans";
 
 interface RadioButtonProps {
 	value: Plan["name"];

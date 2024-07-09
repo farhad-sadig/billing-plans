@@ -6,7 +6,7 @@ import { PLANS, Plan } from "@/constants/plans";
 import CloseButton from "./CloseButton";
 import { formatDate, getProratedChargeDescription } from "@/utils/utils";
 
-interface ModalProps {
+interface PlanChangeModalProps {
 	show: boolean;
 	onClose: () => void;
 	newPlanName: Plan["name"];
@@ -14,7 +14,7 @@ interface ModalProps {
 	email: string;
 }
 
-const Modal: React.FC<ModalProps> = ({
+const PlanChangeModal: React.FC<PlanChangeModalProps> = ({
 	show,
 	onClose,
 	newPlanName,
@@ -156,4 +156,4 @@ const Modal: React.FC<ModalProps> = ({
 	);
 };
 
-export default Modal;
+export default PlanChangeModal;

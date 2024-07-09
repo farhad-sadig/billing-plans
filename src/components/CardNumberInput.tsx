@@ -18,7 +18,7 @@ const CardNumberInput: React.FC<CardNumberInputProps> = ({
 
 	const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const value = e.target.value;
-		const plainCardNumber = value.replace(/\D/g, ""); // Remove all non-digit characters
+		const plainCardNumber = value.replace(/\D/g, "");
 
 		if (plainCardNumber.length <= 16) {
 			setCardNumber(plainCardNumber);

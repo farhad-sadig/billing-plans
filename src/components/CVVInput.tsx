@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import ErrorMessage from "./ErrorMessage"; // Assuming the ErrorMessage component exists
+import ErrorMessage from "./ErrorMessage";
 import { styleInputErrorAndFocus } from "@/utils/utils";
 
 interface CVVInputProps {
@@ -13,7 +13,7 @@ const CVVInput: React.FC<CVVInputProps> = ({ cvv, setCvv }) => {
 	const [isFocused, setIsFocused] = useState<boolean>(false);
 
 	const handleCvvChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const value = e.target.value.replace(/\D/g, ""); // Remove all non-digit characters
+		const value = e.target.value.replace(/\D/g, "");
 		setCvv(value);
 	};
 

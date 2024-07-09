@@ -4,7 +4,7 @@ import { PLANS, Plan } from "@/constants/plans";
 import { BasicPlanIcon, ProfessionalPlanIcon, StarterPlanIcon } from "./Icons";
 import RadioButton from "./RadioButton";
 import SaveChangesButton from "./SaveChangesButton";
-import Modal from "./Modal";
+import PlanChangeModal from "./PlanChangeModal";
 import { formatDate } from "@/utils/utils";
 
 const PlansSection: React.FC = () => {
@@ -44,19 +44,48 @@ const PlansSection: React.FC = () => {
 			const pendingPlanName = subscription.pendingPlanName;
 			const isDowngrade = pendingPlanName === "Basic";
 
+			const bannerDetails = isDowngrade
+				? {
+						message: `You will be downgraded from Professional plan to ${pendingPlanName} plan at the end of your current billing period.`,
+						buttonText: "Cancel Downgrade",
+						bannerBackground: "bg-amber-50",
+						iconFillColor: "#F97316"
+				  }
+				: {
+						message:
+							"Your membership will be cancelled at the end of your billing period.",
+						buttonText: "Cancel Unsubscribe",
+						bannerBackground: "bg-gray-50",
+						iconFillColor: "#404040"
+				  };
+
 			return (
-				<div className="bg-yellow-100 p-4 rounded-lg">
-					<p className="text-yellow-800">
-						{isDowngrade
-							? `You will be downgraded to the ${pendingPlanName} plan at the end of your current billing period.`
-							: "Your membership will be cancelled at the end of your billing period."}
-					</p>
-					<button
-						className="text-blue-500 underline"
-						onClick={handleCancelPendingChange}
-					>
-						Cancel {isDowngrade ? "Downgrade" : "Unsubscribe"}
-					</button>
+				<div
+					className={`flex gap-4 px-4 py-3 rounded-lg font-medium text-sm tablet:items-center desktop:max-w-[936px] ${bannerDetails.bannerBackground}`}
+				>
+					<div className="w-6 h-6">
+						<svg
+							width="20"
+							height="20"
+							viewBox="0 0 20 20"
+							fill="none"
+							xmlns="http://www.w3.org/2000/svg"
+						>
+							<path
+								d="M10 20C4.47715 20 0 15.5228 0 10C0 4.47715 4.47715 0 10 0C15.5228 0 20 4.47715 20 10C20 15.5228 15.5228 20 10 20ZM9 13V15H11V13H9ZM9 5V11H11V5H9Z"
+								fill={bannerDetails.iconFillColor}
+							/>
+						</svg>
+					</div>
+					<div className="flex flex-col w-full justify-start items-start gap-4 tablet:flex-row tablet:items-center">
+						<span className="text-neutral-900">{bannerDetails.message}</span>
+						<button
+							className="bg-white px-3 py-2 rounded border-[0.5px] border-solid border-neutral-200 tablet:ml-auto"
+							onClick={handleCancelPendingChange}
+						>
+							{bannerDetails.buttonText}
+						</button>
+					</div>
 				</div>
 			);
 		}
@@ -77,7 +106,7 @@ const PlansSection: React.FC = () => {
 				{planIcon}
 				<div className="flex flex-col gap-2">
 					<div className="font-semibold text-lg text-neutral-900">
-						{planName} • ${PLANS[planName].monthlyRate}/month
+						{planName} plan • ${PLANS[planName].monthlyRate}/month
 					</div>
 					<div className="font-normal text-sm text-neutral-600">
 						{description}
@@ -107,7 +136,7 @@ const PlansSection: React.FC = () => {
 			<div className="flex flex-col desktop:flex-row desktop:items-start desktop:gap-8">
 				<div className="flex flex-col gap-4 w-full">
 					{showModal && (
-						<Modal
+						<PlanChangeModal
 							show={showModal}
 							onClose={() => setShowModal(false)}
 							newPlanName={newPlanName}
@@ -115,20 +144,21 @@ const PlansSection: React.FC = () => {
 							email={email}
 						/>
 					)}
+
 					{renderPlanOption(
 						"Starter",
 						<StarterPlanIcon />,
-						"Includes up to 10 users, 20GB individual data, and access to all features."
+						"Includes up to 10 users, 20GB individual data and access to all features."
 					)}
 					{renderPlanOption(
 						"Basic",
 						<BasicPlanIcon />,
-						"Includes up to 20 users, 40GB individual data, and access to all features."
+						"Includes up to 20 users, 40GB individual data and access to all features."
 					)}
 					{renderPlanOption(
 						"Professional",
 						<ProfessionalPlanIcon />,
-						"Includes up to 50 users, 100GB individual data, and access to all features."
+						"Includes up to 50 users, 100GB individual data and access to all features."
 					)}
 					<div className="flex justify-end items-center gap-4 py-4">
 						<SaveChangesButton
