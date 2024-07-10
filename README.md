@@ -1,6 +1,6 @@
 # Billing Plans Section
 
-This project includes a Billing Plan section that allows users to view, change, and manage their subscription plans. The section consists of several components and a context to handle subscription state, plan changes, and interactions with the backend API. Note that mock email and payment systems are used for demonstration purposes and are not real, but the components can easily be integrated into real systems. This project is implemented using TypeScript.
+This project includes a Billing Plans section that allows users to view, change, and manage their subscription plans. The section consists of several components and a context to handle subscription state, plan changes, and interactions with the backend API. Note that mock email and payment systems are used for demonstration purposes and are not real, but the components can easily be integrated into real systems. This project is implemented using TypeScript.
 
 The project leverages Next.js with the App Router and Tailwind CSS.
 
