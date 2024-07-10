@@ -30,7 +30,6 @@ async function main() {
       );
     `);
 
-		// Insert sample billing info
 		await client.query(`
       INSERT INTO billing_info (email, plan_name, next_billing_date, card_number, cardholder_name, expiry, cvv, country, address_line1, address_line2, city, state, zip)
       VALUES

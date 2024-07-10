@@ -8,7 +8,7 @@ interface CloseButtonProps {
 const CloseButton: React.FC<CloseButtonProps> = ({ onClose }) => {
 	return (
 		<button
-			className="w-6 h-6 flex justify-center items-start"
+			className="w-6 h-6 flex justify-center items-start mt-2"
 			onClick={onClose}
 		>
 			<CloseModalIcon />

@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Billing Plans Section
 
-## Getting Started
+This project includes a Billing Plan section that allows users to view, change, and manage their subscription plans. The section consists of several components and a context to handle subscription state, plan changes, and interactions with the backend API. Note that mock email and payment systems are used for demonstration purposes and are not real, but the components can easily be integrated into real systems. This project is implemented using TypeScript.
 
-First, run the development server:
+The project leverages Next.js with the App Router and Tailwind CSS.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Components
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### PlansSection
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The PlansSection component is responsible for displaying different billing plans (Starter, Basic, Professional), showing the current subscription details, and allowing users to change their subscription plan.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+**Key features:**
 
-## Learn More
+- Displays various billing plans.
+- Shows the current subscription details.
+- Allows users to change their subscription plan.
+- Triggers a modal to confirm changes before updating the plan.
+- Uses the usePlan context to manage the subscription state.
+- Formats and displays the next billing date.
+- Updates the highlighted plan based on the saved subscription.
 
-To learn more about Next.js, take a look at the following resources:
+### Modal
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The Modal component is used to confirm plan changes or prompt the user to add billing information if not found.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+**Key features:**
 
-## Deploy on Vercel
+- Confirms upgrading the plan.
+- Prompts the user to add billing information if necessary.
+- Uses the usePlan context to update the plan.
+- Displays a loading state while the API call is in progress.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### PlanContext
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+The PlanContext manages the global state for the subscription plan, providing functions to update the plan and retrieve the current subscription state.
+
+**Key features:**
+
+- Manages the subscription state.
+- Saves the subscription plan to local storage to persist state across page reloads.
+- Provides functions for updating the plan.
+- Includes logic for prorated upgrades, immediate upgrades, downgrades, and unsubscriptions.
+- Handles prevPlanName and newPlanName to determine the timing of plan changes.
+- Fields change_pending and pending_plan_name are used to manage pending changes.
+
+### Plan Interface
+
+- **Responsive:** Ensures that the plan details are clearly visible on all devices (desktop, tablet, mobile) with consistent styling and functionality.
+- **Current subscription information:** Dynamically displays the user's current subscription information, including the "plan type", "pricing", and the "date of the next billing" (not for the Starter plan, since it is free).
+- **Plan selection:** Allows users to select one plan at a time. Changing from their current plan allows them to "Save changes", triggering the upgrade or downgrade logic.
+
+## Plan Management
+
+### Upgrading from the Free plan ("Starter" plan):
+
+- Effected immediately.
+- Displays a confirmation modal before triggering the billing.
+- After billing is completed, returns the user to the plan module, with the current plan information updated and a success notification.
+
+### Mid-cycle downgrades (including unsubscriptions / plan cancellations):
+
+- Effected at the end of the current subscription cycle.
+- Displays a confirmation modal before confirming.
+- Displays a banner to allow users to cancel the downgrade before the end of the current subscription cycle.
+
+### Mid-cycle upgrades:
+
+- Billed and effected immediately.
+- Prorated based on the remaining duration till the end of the current subscription cycle. The prorated charge is calculated as: (New monthly rate - Old monthly rate / Total days in month) x Remaining days in month after upgrade.
+- Displays a confirmation modal before triggering the billing, including information about the prorated amount to be billed.
+- After billing is completed, returns the user to the plan module, with the current plan information updated and a success notification.
+
+### Billing information:
+
+If the user has not filled their billing information, a prompt will be triggered to complete it.

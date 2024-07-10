@@ -6,6 +6,7 @@ import RadioButton from "./RadioButton";
 import SaveChangesButton from "./SaveChangesButton";
 import PlanChangeModal from "./PlanChangeModal";
 import { formatDate } from "@/utils/utils";
+import Toast from "./Toast";
 
 const PlansSection: React.FC = () => {
 	const { subscription, updatePlan, cancelPendingChange } = usePlan();
@@ -17,9 +18,15 @@ const PlansSection: React.FC = () => {
 	const [newPlanName, setNewPlanName] = useState(actualPlanName);
 	const [isButtonEnabled, setIsButtonEnabled] = useState(false);
 	const [showModal, setShowModal] = useState(false);
+	const [showToast, setShowToast] = useState(false);
 
 	useEffect(() => {
 		setIsButtonEnabled(newPlanName !== actualPlanName);
+
+		if (localStorage.getItem("upgradePending") === "true") {
+			setShowToast(true);
+			localStorage.removeItem("upgradePending");
+		}
 	}, [newPlanName, actualPlanName]);
 
 	const handlePlanChange = (planType: Plan["name"]) => {
@@ -33,6 +40,13 @@ const PlansSection: React.FC = () => {
 	const handleConfirmChange = () => {
 		updatePlan(newPlanName, email);
 		setShowModal(false);
+		if (
+			(currentPlanName === "Starter" &&
+				(newPlanName === "Basic" || newPlanName === "Professional")) ||
+			(currentPlanName === "Basic" && newPlanName === "Professional")
+		) {
+			setShowToast(true);
+		}
 	};
 
 	const handleCancelPendingChange = () => {
@@ -80,7 +94,7 @@ const PlansSection: React.FC = () => {
 					<div className="flex flex-col w-full justify-start items-start gap-4 tablet:flex-row tablet:items-center">
 						<span className="text-neutral-900">{bannerDetails.message}</span>
 						<button
-							className="bg-white px-3 py-2 rounded border-[0.5px] border-solid border-neutral-200 tablet:ml-auto"
+							className="shadow bg-white px-3 py-2 rounded border-[0.5px] border-solid border-neutral-200 tablet:ml-auto"
 							onClick={handleCancelPendingChange}
 						>
 							{bannerDetails.buttonText}
@@ -90,6 +104,38 @@ const PlansSection: React.FC = () => {
 			);
 		}
 		return null;
+	};
+
+	const renderPlanTag = (planName: Plan["name"]) => {
+		let bgColor, borderColor, textColor, text;
+		switch (planName) {
+			case "Basic":
+				bgColor = "bg-green-50";
+				borderColor = "border-green-200";
+				textColor = "text-green-700";
+				text = "Recommended";
+				break;
+			case "Starter":
+				bgColor = "bg-indigo-50";
+				borderColor = "border-indigo-200";
+				textColor = "text-indigo-700";
+				text = "Great to start";
+				break;
+			default:
+				bgColor = "bg-amber-50";
+				borderColor = "border-amber-200";
+				textColor = "text-amber-700";
+				text = "Great for team";
+		}
+		return (
+			<div
+				className={`flex items-center ${bgColor} px-2 py-0.5 rounded-full border border-solid ${borderColor} mr-auto`}
+			>
+				<span className={`font-normal text-sm text-center ${textColor}`}>
+					{text}
+				</span>
+			</div>
+		);
 	};
 
 	const renderPlanOption = (
@@ -105,9 +151,13 @@ const PlansSection: React.FC = () => {
 			<div className="flex flex-col items-start tablet:flex-row gap-5 tablet:items-center">
 				{planIcon}
 				<div className="flex flex-col gap-2">
-					<div className="font-semibold text-lg text-neutral-900">
-						{planName} plan • ${PLANS[planName].monthlyRate}/month
+					<div className="flex flex-col gap-3 tablet:flex-row">
+						<div className="font-semibold text-lg text-neutral-900">
+							{planName} plan • ${PLANS[planName].monthlyRate}/month
+						</div>
+						{renderPlanTag(planName)}
 					</div>
+
 					<div className="font-normal text-sm text-neutral-600">
 						{description}
 					</div>
@@ -123,6 +173,7 @@ const PlansSection: React.FC = () => {
 
 	return (
 		<div className="flex flex-col w-full gap-8 py-8 px-4 bg-white tablet:px-8 tablet:py-16 desktop:mx-auto desktop:max-w-7xl">
+			{showToast && <Toast onClose={() => setShowToast(false)} />}
 			<div className="flex flex-col gap-2">
 				<h1 className="font-semibold text-xl text-neutral-900">
 					Billing plans
@@ -144,7 +195,6 @@ const PlansSection: React.FC = () => {
 							email={email}
 						/>
 					)}
-
 					{renderPlanOption(
 						"Starter",
 						<StarterPlanIcon />,

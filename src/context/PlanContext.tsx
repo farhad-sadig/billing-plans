@@ -63,7 +63,7 @@ export const PlanProvider: React.FC<{ children: ReactNode }> = ({
 				  ).toISOString();
 
 			const newSubscription: Subscription = {
-				plan: subscription?.plan || newPlan, // Keep the current plan for now
+				plan: subscription?.plan || newPlan,
 				nextBillingDate: nextBillingDate,
 				email: email,
 				prevPlanName: subscription?.plan.name || null,
@@ -72,15 +72,13 @@ export const PlanProvider: React.FC<{ children: ReactNode }> = ({
 			};
 
 			if (newPlan.monthlyRate < (subscription?.plan.monthlyRate || 0)) {
-				// Downgrade or Unsubscribe: schedule for next billing cycle
 				newSubscription.changePending = true;
 				newSubscription.pendingPlanName = newPlanName;
 			} else {
-				// Upgrade: apply immediately after confirmation in modal
-				newSubscription.plan = newPlan; // Apply the new plan immediately
+				newSubscription.plan = newPlan;
+				localStorage.setItem("upgradePending", "true");
 			}
 
-			// Save subscription to database
 			const response = await fetch("/api/subscription", {
 				method: "POST",
 				headers: {

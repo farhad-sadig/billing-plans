@@ -42,7 +42,7 @@ const PlanChangeModal: React.FC<PlanChangeModalProps> = ({
 				} else {
 					billingInfoFound = false;
 				}
-			} else if (response.status === 400 || response.status === 404) {
+			} else if (response.status === 400) {
 				billingInfoFound = false;
 			} else {
 				console.error("Error:", response.statusText);
@@ -99,7 +99,7 @@ const PlanChangeModal: React.FC<PlanChangeModalProps> = ({
 				{billingInfoExists ? (
 					<>
 						<div className="flex flex-col gap-1">
-							<div className="flex justify-between items-center">
+							<div className="flex justify-between">
 								<span className="font-semibold text-lg text-neutral-900">
 									{title}
 								</span>
@@ -111,13 +111,13 @@ const PlanChangeModal: React.FC<PlanChangeModalProps> = ({
 						</div>
 						<div className="flex gap-3 font-medium text-base">
 							<button
-								className="bg-white w-1/2 px-4 py-2.5 text-neutral-900 rounded border-[0.5px] border-solid border-neutral-200 mr-[6px] tablet:w-full hover:bg-neutral-50 focus:bg-neutral-50"
+								className="shadow bg-white w-1/2 px-4 py-2.5 text-neutral-900 rounded border-[0.5px] border-solid border-neutral-200 mr-[6px] tablet:w-full hover:bg-neutral-50 focus:bg-neutral-50"
 								onClick={onClose}
 							>
 								Cancel
 							</button>
 							<button
-								className="bg-indigo-700 w-full px-4 py-2.5 text-white rounded ml-[6px] hover:bg-indigo-800 focus:bg-indigo-800"
+								className="shadow bg-indigo-700 w-full px-4 py-2.5 text-white rounded ml-[6px] hover:bg-indigo-800 focus:bg-indigo-800"
 								onClick={handleConfirm}
 								disabled={loading}
 							>
@@ -140,7 +140,7 @@ const PlanChangeModal: React.FC<PlanChangeModalProps> = ({
 						</div>
 						<div className="flex justify-center">
 							<button
-								className="bg-indigo-700 w-full px-4 py-2.5 text-white rounded hover:bg-indigo-800 focus:bg-indigo-800"
+								className="shadow bg-indigo-700 w-full px-4 py-2.5 text-white rounded hover:bg-indigo-800 focus:bg-indigo-800"
 								onClick={() => {
 									onClose();
 									router.push(`/billing?plan=${newPlanName}`);
