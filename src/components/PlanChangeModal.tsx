@@ -5,6 +5,7 @@ import { usePlan } from "@/context/PlanContext";
 import { PLANS, Plan } from "@/constants/plans";
 import CloseButton from "./CloseButton";
 import { formatDate, getProratedChargeDescription } from "@/utils/utils";
+import ProcessingModal from "./ProcessingModal";
 
 interface PlanChangeModalProps {
 	show: boolean;
@@ -121,7 +122,7 @@ const PlanChangeModal: React.FC<PlanChangeModalProps> = ({
 								onClick={handleConfirm}
 								disabled={loading}
 							>
-								{loading ? "Loading..." : "Confirm"}
+								Confirm
 							</button>
 						</div>
 					</>
@@ -152,6 +153,7 @@ const PlanChangeModal: React.FC<PlanChangeModalProps> = ({
 					</>
 				)}
 			</div>
+			{loading && <ProcessingModal />}
 		</div>
 	);
 };
