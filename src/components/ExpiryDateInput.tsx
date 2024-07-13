@@ -46,8 +46,14 @@ const ExpiryDateInput: React.FC<ExpiryDateInputProps> = ({
 		const [month, year] = date.split("/").map(Number);
 		if (month < 1 || month > 12) return false;
 
+		const currentDate = new Date();
 		const currentYear = new Date().getFullYear() % 100;
-		return year >= currentYear;
+		const currentMonth = currentDate.getMonth() + 1;
+		if (year < currentYear || (year === currentYear && month < currentMonth)) {
+			return false;
+		}
+
+		return true;
 	};
 
 	return (
