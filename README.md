@@ -31,10 +31,13 @@ Welcome to the Billing Plans Project! This project allows users to select and ma
 
 ## Demo
 
-Below are a few short demos of the key features of the Billing Plans Project in action:
+Below are a few short demos of the key features of the Billing Plans Project in action.
 
+Billing plans section, modal triggering and billing form:
 ![Billing Plan Key Highlights - 1](public/gifs/desc-1.gif)
 
+Responsiveness and input validation of the billing form:
 ![Billing Plan Key Highlights - 2](public/gifs/desc-2.gif)
 
+Application of changes to the existing billing plan:
 ![Billing Plan Key Highlights - 3](public/gifs/desc-3.gif)
