@@ -56,3 +56,22 @@ body {
 .spinner {
   animation: spin-grow 2s linear infinite;
 }
+
+.custom-select-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.custom-select {
+
+  appearance: none;
+  background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iNiIgdmlld0JveD0iMCAwIDEwIDYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik00Ljk5OTg0IDMuNzgxMDJMOCAwLjQ4MTIwMUw5LjI0MjUxIDEuNDI0MDFMNC45OTk4NCA1LjY2NjY4TDAuNzU3MjAyIDEuNDI0MDFMMi43MDAyIDAuNDgxMjAxTDQuOTk5ODQgMy43ODEwMloiIGZpbGw9IiNBM0EzQTMiLz4KPC9zdmc+Cg==') no-repeat;
+  background-position: calc(100% - 20px) center;
+  background-size: 10px;
+
+}
+
+.custom-select::-ms-expand {
+  display: none;
+}
