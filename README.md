@@ -13,10 +13,10 @@ Welcome to the Billing Plans Project! This project allows users to select and ma
 
 ## Stack
 
-- **Next.js:**
-- **TypeScript:**
-- **Tailwind CSS:**
-- **PostgreSQL:**
+- **Next.js**
+- **TypeScript**
+- **Tailwind CSS**
+- **PostgreSQL**
 
 ## Features
 
@@ -31,6 +31,9 @@ Welcome to the Billing Plans Project! This project allows users to select and ma
 
 ## Demo
 
-Below are a few short demos of the key features of the Billing Plan Project in action:
+Below are a few short demos of the key features of the Billing Plans Project in action:
 
-![Billing Plan Key Highlights](public/gifs/desc-1.gif)
+![Billing Plan Key Highlights - 1](public/gifs/desc-1.gif)
+
+
+![Billing Plan Key Highlights - 2](public/gifs/desc-2.gif)
