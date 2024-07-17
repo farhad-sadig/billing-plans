@@ -35,5 +35,6 @@ Below are a few short demos of the key features of the Billing Plans Project in 
 
 ![Billing Plan Key Highlights - 1](public/gifs/desc-1.gif)
 
-
 ![Billing Plan Key Highlights - 2](public/gifs/desc-2.gif)
+
+![Billing Plan Key Highlights - 3](public/gifs/desc-3.gif)
