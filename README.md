@@ -6,6 +6,7 @@
 - [Stack](#stack)
 - [Features](#features)
 - [Demo](#demo)
+- [Note](#note)
 
 ## Introduction
 
@@ -41,3 +42,7 @@ Responsiveness and input validation of the billing form:
 
 Application of changes to the existing billing plan:
 ![Billing Plan Key Highlights - 3](public/gifs/desc-3.gif)
+
+## Note
+
+Payments are mocked, but the components can easily be hooked to real systems.
