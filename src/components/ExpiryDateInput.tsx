@@ -75,6 +75,8 @@ const ExpiryDateInput: React.FC<ExpiryDateInputProps> = ({
 				className={styleInputErrorAndFocus(Boolean(error), isFocused)}
 				pattern="\d{2}/\d{2}"
 				title="Enter expiry date in MM/YY format"
+				aria-required="true"
+				aria-invalid={Boolean(error)}
 			/>
 			{isTouched && error && <ErrorMessage message={error} />}
 		</div>

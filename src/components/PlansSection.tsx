@@ -76,6 +76,8 @@ const PlansSection: React.FC = () => {
 			return (
 				<div
 					className={`flex gap-4 px-4 py-3 rounded-lg font-medium text-sm tablet:items-center desktop:max-w-[936px] ${bannerDetails.bannerBackground}`}
+					role="alert"
+					aria-live="assertive"
 				>
 					<div className="w-6 h-6">
 						<svg
@@ -147,6 +149,15 @@ const PlansSection: React.FC = () => {
 			className={`flex items-start p-5 gap-5 rounded-lg border border-solid hover:bg-neutral-50 tablet:items-center ${
 				newPlanName === planName ? "border-indigo-600" : "border-neutral-200"
 			}`}
+			role="radio"
+			aria-checked={newPlanName === planName}
+			tabIndex={0}
+			onClick={() => handlePlanChange(planName)}
+			onKeyDown={(e) => {
+				if (e.key === "Enter" || e.key === " ") {
+					handlePlanChange(planName);
+				}
+			}}
 		>
 			<div className="flex flex-col items-start tablet:flex-row gap-5 tablet:items-center">
 				{planIcon}

@@ -94,7 +94,11 @@ const AddressDetails: React.FC<AddressDetailsProps> = ({
 	}, [address.zip]);
 
 	return (
-		<div className="flex flex-col gap-6 text-sm mt-4">
+		<div
+			className="flex flex-col gap-6 text-sm mt-4"
+			role="form"
+			aria-labelledby="address-details"
+		>
 			<div className="flex flex-col gap-1.5 text-sm">
 				<label className="font-medium text-neutral-700" htmlFor="country">
 					Country / Region
@@ -108,6 +112,8 @@ const AddressDetails: React.FC<AddressDetailsProps> = ({
 					onFocus={() => handleFocus("country")}
 					onBlur={(e) => handleBlur("country", e.target.value)}
 					required
+					aria-required="true"
+					aria-invalid={errors.country}
 				>
 					<option value="" disabled>
 						Country
@@ -139,6 +145,8 @@ const AddressDetails: React.FC<AddressDetailsProps> = ({
 							errors.addressLine1,
 							focused.addressLine1
 						)}
+						aria-required="true"
+						aria-invalid={errors.addressLine1}
 					/>
 					{errors.addressLine1 && (
 						<ErrorMessage message="Address is required" />
@@ -171,6 +179,8 @@ const AddressDetails: React.FC<AddressDetailsProps> = ({
 						onBlur={(e) => handleBlur("city", e.target.value)}
 						required
 						className={styleInputErrorAndFocus(errors.city, focused.city)}
+						aria-required="true"
+						aria-invalid={errors.city}
 					/>
 					{errors.city && <ErrorMessage message="City is required" />}
 				</div>
@@ -187,6 +197,8 @@ const AddressDetails: React.FC<AddressDetailsProps> = ({
 						onBlur={(e) => handleBlur("state", e.target.value)}
 						className={styleInputErrorAndFocus(errors.state, focused.state)}
 						required
+						aria-required="true"
+						aria-invalid={errors.state}
 					>
 						<option value="" disabled>
 							State
@@ -213,6 +225,8 @@ const AddressDetails: React.FC<AddressDetailsProps> = ({
 						onBlur={(e) => handleBlur("zip", e.target.value)}
 						required
 						className={styleInputErrorAndFocus(errors.zip, focused.zip)}
+						aria-required="true"
+						aria-invalid={errors.zip}
 					/>
 					{errors.zip && <ErrorMessage message="Invalid ZIP code" />}
 				</div>

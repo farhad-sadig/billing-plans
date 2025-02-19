@@ -18,6 +18,7 @@ const SaveChangesButton: React.FC<SaveChangesButtonProps> = ({
 			}`}
 			onClick={onClick}
 			disabled={!isEnabled}
+			aria-disabled={!isEnabled}
 		>
 			Save Changes
 		</button>

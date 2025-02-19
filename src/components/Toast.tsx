@@ -13,7 +13,11 @@ const Toast: React.FC<ToastProps> = ({ onClose }) => {
 	}, [onClose]);
 
 	return (
-		<div className="fixed self-center flex items-center gap-3 bg-green-50 pl-1 pr-2.5 pt-1 pb-1 rounded-full z-10">
+		<div
+			className="fixed self-center flex items-center gap-3 bg-green-50 pl-1 pr-2.5 pt-1 pb-1 rounded-full z-10"
+			role="alert"
+			aria-live="assertive"
+		>
 			<div className="flex items-center bg-white px-2.5 py-0.5 rounded-full">
 				<span className="font-medium text-sm text-center text-green-700">
 					Success

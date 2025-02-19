@@ -52,6 +52,8 @@ const CardholderNameInput: React.FC<CardholderNameInputProps> = ({
 				onFocus={handleFocus}
 				onBlur={handleBlur}
 				required
+				aria-required="true"
+				aria-invalid={Boolean(error)}
 			/>
 			{error && <ErrorMessage message={error} />}
 		</div>

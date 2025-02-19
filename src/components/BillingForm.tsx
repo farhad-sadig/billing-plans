@@ -138,6 +138,7 @@ const BillingForm: React.FC = () => {
 						ref={formRef}
 						onSubmit={handleSubmit}
 						className="flex flex-col gap-6"
+						aria-labelledby="billing-information"
 					>
 						<span className="font-medium text-base text-neutral-900">
 							Payment Details

@@ -54,6 +54,8 @@ const CVVInput: React.FC<CVVInputProps> = ({ cvv, setCvv }) => {
 				className={styleInputErrorAndFocus(Boolean(error), isFocused)}
 				pattern="\d{3,4}"
 				title="Enter 3 or 4 digit CVV"
+				aria-required="true"
+				aria-invalid={Boolean(error)}
 			/>
 			{isTouched && error && <ErrorMessage message={error} />}
 		</div>

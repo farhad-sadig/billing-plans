@@ -104,6 +104,8 @@ const CardNumberInput: React.FC<CardNumberInputProps> = ({
 					onBlur={handleBlur}
 					maxLength={19}
 					required
+					aria-required="true"
+					aria-invalid={Boolean(error)}
 				/>
 			</div>
 			{error && <ErrorMessage message={error} />}

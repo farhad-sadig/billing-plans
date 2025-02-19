@@ -57,6 +57,8 @@ const EmailInput: React.FC<EmailInputProps> = ({ email, setEmail }) => {
 				onFocus={handleFocus}
 				onBlur={handleBlur}
 				required
+				aria-required="true"
+				aria-invalid={Boolean(error)}
 			/>
 			{isTouched && error && <ErrorMessage message={error} />}
 		</div>

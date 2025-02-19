@@ -2,7 +2,12 @@ import React from "react";
 
 const ProcessingModal: React.FC = () => {
 	return (
-		<div className="fixed inset-0 flex items-center justify-center bg-neutral-950 bg-opacity-75 z-10">
+		<div
+			className="fixed inset-0 flex items-center justify-center bg-neutral-950 bg-opacity-75 z-10"
+			role="dialog"
+			aria-labelledby="processing-title"
+			aria-modal="true"
+		>
 			<div className="w-80 flex flex-col items-center gap-5 bg-white p-6 rounded border border-solid border-neutral-200">
 				<div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
 					<svg
@@ -23,7 +28,9 @@ const ProcessingModal: React.FC = () => {
 						/>
 					</svg>
 				</div>
-				<span className="text-neutral-900">Payment is processing</span>
+				<span className="text-neutral-900" id="processing-title">
+					Payment is processing
+				</span>
 			</div>
 		</div>
 	);
