@@ -12,10 +12,17 @@ const RadioButton: React.FC<RadioButtonProps> = ({
 	checked,
 	handlePlanChange
 }) => (
-	<div
-		className={`group w-6 h-6 ml-auto flex-shrink-0 mt-2 tablet:mt-0 rounded-full`}
-		onClick={() => handlePlanChange(value)}
+	<label
+		className={`group w-6 h-6 ml-auto flex-shrink-0 mt-2 tablet:mt-0 rounded-full cursor-pointer`}
 	>
+		<input
+			type="radio"
+			name="plan"
+			value={value}
+			checked={checked}
+			onChange={() => handlePlanChange(value)}
+			className="hidden"
+		/>
 		{checked ? (
 			<svg
 				width="24"
@@ -45,7 +52,7 @@ const RadioButton: React.FC<RadioButtonProps> = ({
 				/>
 			</svg>
 		)}
-	</div>
+	</label>
 );
 
 export default RadioButton;
